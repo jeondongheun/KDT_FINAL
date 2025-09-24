@@ -49,8 +49,8 @@
             <Border x:Name="borderH" Height="70" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <mui:ProgressRing x:Name="progHelmet" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
-                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkH" Margin="13" Width="20" Height="20" Foreground="#10B981"/>
-                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnH" Margin="13" Width="20" Height="20" Foreground="#F59E0B"/>
+                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkH" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnH" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
                     <TextBlock x:Name="helmets" Text="안전모" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
                 </StackPanel>
             </Border>
@@ -58,8 +58,8 @@
             <Border x:Name="borderV" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <mui:ProgressRing x:Name="progVest" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
-                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkV" Margin="13" Width="20" Height="20" Foreground="#10B981"/>
-                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnV" Margin="13" Width="20" Height="20" Foreground="#F59E0B"/>
+                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkV" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnV" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
                     <TextBlock x:Name="vest" Text="안전 조끼" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
                 </StackPanel>
             </Border>
@@ -67,8 +67,8 @@
             <Border x:Name="borderG" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <mui:ProgressRing x:Name="progGloves" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
-                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981"/>
-                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnG" Margin="13" Width="20" Height="20" Foreground="#F59E0B"/>
+                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnG" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
                     <TextBlock x:Name="gloves" Text="안전 장갑" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
                 </StackPanel>
             </Border>

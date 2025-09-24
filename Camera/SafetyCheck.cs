@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Rect = OpenCvSharp.Rect;
 using Size = OpenCvSharp.Size;
 
 namespace Camera
@@ -19,15 +20,22 @@ namespace Camera
         private static InferenceSession session;
 
         // 카메라로 들어오는 이미지 분석용
-        private static readonly int imgSize = 640;
+        private static readonly int imgSize = 416;
         private static readonly float threshold = 0.5f;
 
         // 안전 장비 클래스 (YOLO 모델에 맞게 조정 필요)
         private static readonly string[] classNames = {
             "helmet",           // 0: 안전모
-            "safety_vest",      // 1: 안전 조끼
-            "gloves",           // 2: 장갑
-            "person"            // 3: 사람
+            "gloves",           // 1: 안전 장갑
+            "vest",             // 2: 안전 조끼
+            "boots",
+            "goggles",
+            "none",
+            "Person",           // 6: 사람
+            "no_helmet",
+            "no_goggle",
+            "no_gloves",
+            "no_boots"
         };
 
         public class SafetyResult
@@ -43,10 +51,25 @@ namespace Camera
         // onnx 모델 연동
         public static void Safety()
         {
-            string modelPath = "helmet.onnx";       // 파일명 변경해야 함
-            session = new InferenceSession(modelPath);
+            string modelPath = "best.onnx";       // 파일명 변경해야 함
 
-            if (session == null) MessageBox.Show("모델 연동 실패");
+            if (!File.Exists(modelPath))
+            {
+                Console.WriteLine($"모델 파일이 없습니다: {Path.GetFullPath(modelPath)}");
+                MessageBox.Show($"모델 파일을 찾을 수 없습니다: {Path.GetFullPath(modelPath)}");
+                return;
+            }
+
+            try
+            {
+                session = new InferenceSession(modelPath);  // 주석 해제!
+                Console.WriteLine("모델 로드 성공");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"모델 로드 실패: {ex.Message}");
+                MessageBox.Show($"모델 로드 실패: {ex.Message}");
+            }
         }
 
         public static SafetyResult CheckSafety(Mat frame)
@@ -64,7 +87,10 @@ namespace Camera
                 var output = results.FirstOrDefault()?.AsTensor<float>();
 
                 // 결과 분석
-                return AnalyzeDetections(output);
+                var result = AnalyzeDetections(output);
+                Debug.WriteLine($"분석 결과 - Person: {result.PersonDetected}, Helmet: {result.HasHelmet}, Vest: {result.HasSafetyVest}, Gloves: {result.HasGloves}");
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -100,60 +126,85 @@ namespace Camera
             var result = new SafetyResult();
             if (output == null) return result;
 
-            bool hasHelmet = false, hasVest = false, hasGloves = false, hasPerson = false;
+            bool hasPerson = false;
+            var persons = new List<Rect>();
+            var helmets = new List<Rect>();
+            var vests = new List<Rect>();
+            var gloves = new List<Rect>();
+
             int detections = output.Dimensions[1];
 
             for (int i = 0; i < detections; i++)
             {
-                float confidence = output[0, i, 4];
-                if (confidence < threshold) continue;
+                float objConf = output[0, i, 4];
+                if (objConf < threshold) continue;
 
-                // 가장 높은 확률의 클래스 찾기
-                int classId = 0;
-                float maxScore = output[0, i, 5];
-                for (int c = 1; c < classNames.Length; c++)
+                // 가장 높은 클래스 확률 찾기
+                int classId = -1;
+                float bestScore = 0f;
+                for (int c = 0; c < classNames.Length; c++)
                 {
-                    float score = output[0, i, 5 + c];
-                    if (score > maxScore)
+                    float classProb = output[0, i, 5 + c];
+                    float score = objConf * classProb;
+                    if (score > bestScore)
                     {
-                        maxScore = score;
+                        bestScore = score;
                         classId = c;
                     }
                 }
+                if (bestScore < threshold || classId < 0) continue;
 
-                if (confidence * maxScore < threshold) continue;
+                // bbox 좌표 (YOLO 출력 구조: cx, cy, w, h)
+                float cx = output[0, i, 0];
+                float cy = output[0, i, 1];
+                float w = output[0, i, 2];
+                float h = output[0, i, 3];
 
-                // 감지된 객체 확인
+                int x = (int)(cx - w / 2);
+                int y = (int)(cy - h / 2);
+                var rect = new Rect(x, y, (int)w, (int)h);
+
+                // 감지된 클래스별로 분류
                 switch (classNames[classId])
                 {
-                    case "helmet": hasHelmet = true; break;
-                    case "safety_vest": hasVest = true; break;
-                    case "gloves": hasGloves = true; break;
-                    case "person": hasPerson = true; break;
+                    case "Person": persons.Add(rect); hasPerson = true; break;
+                    case "helmet": helmets.Add(rect); break;
+                    case "vest": vests.Add(rect); break;
+                    case "gloves": gloves.Add(rect); break;
                 }
             }
 
-            // 결과 설정
+            // 사람 없으면 "작업자 없음" 상태만 반환 (카메라는 계속 돌아감)
+            if (persons.Count == 0)
+            {
+                result.PersonDetected = false;
+                result.IsSafe = true;
+                result.Message = "작업자 없음";
+                return result;
+            }
+
+            // 매핑: 사람 bbox 안에 장비가 있는 경우만 착용 인정
+            bool hasHelmet = false, hasVest = false, hasGloves = false;
+            foreach (var person in persons)
+            {
+                if (helmets.Any(h => person.IntersectsWith(h))) hasHelmet = true;
+                if (vests.Any(v => person.IntersectsWith(v))) hasVest = true;
+                if (gloves.Any(g => person.IntersectsWith(g))) hasGloves = true;
+            }
+
+            // 결과 세팅
+            result.PersonDetected = true;
             result.HasHelmet = hasHelmet;
             result.HasSafetyVest = hasVest;
             result.HasGloves = hasGloves;
-            result.PersonDetected = hasPerson;
 
-            if (hasPerson)
-            {
-                var missing = new List<string>();
-                if (!hasHelmet) missing.Add("안전모");
-                if (!hasVest) missing.Add("안전조끼");
-                if (!hasGloves) missing.Add("안전장갑");
+            var missing = new List<string>();
+            if (!hasHelmet) missing.Add("안전모");
+            if (!hasVest) missing.Add("안전조끼");
+            if (!hasGloves) missing.Add("안전장갑");
 
-                result.IsSafe = missing.Count == 0;
-                result.Message = missing.Count == 0 ? "안전장비 착용 완료" : $"미착용: {string.Join(", ", missing)}";
-            }
-            else
-            {
-                result.IsSafe = true;
-                result.Message = "작업자 없음";
-            }
+            result.IsSafe = missing.Count == 0;
+            result.Message = missing.Count == 0 ? "안전장비 착용 완료" : $"미착용: {string.Join(", ", missing)}";
 
             return result;
         }

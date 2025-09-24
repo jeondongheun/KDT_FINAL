@@ -179,3 +179,5 @@ C:\Users\user\source\repos\PLC_pj\Camera\Camera\bin\Debug\net8.0-windows\runtime
 C:\Users\user\source\repos\PLC_pj\Camera\Camera\bin\Debug\net8.0-windows\runtimes\win-x86\native\onnxruntime.lib
 C:\Users\user\source\repos\PLC_pj\Camera\Camera\bin\Debug\net8.0-windows\runtimes\win-x86\native\onnxruntime_providers_shared.dll
 C:\Users\user\source\repos\PLC_pj\Camera\Camera\bin\Debug\net8.0-windows\runtimes\win-x86\native\onnxruntime_providers_shared.lib
+C:\Users\user\source\repos\PLC_pj\Camera\Camera\bin\Debug\net8.0-windows\FontAwesome.WPF.dll
+C:\Users\user\source\repos\PLC_pj\Camera\Camera\obj\Debug\net8.0-windows\Camera.sourcelink.json

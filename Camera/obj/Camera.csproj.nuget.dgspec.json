@@ -50,6 +50,10 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "dependencies": {
+            "FontAwesome.WPF": {
+              "target": "Package",
+              "version": "[4.7.0.9, )"
+            },
             "Microsoft.ML.OnnxRuntime": {
               "target": "Package",
               "version": "[1.22.1, )"
