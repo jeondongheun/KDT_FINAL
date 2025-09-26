@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "dgSpecHash": "bfkKJw7tnjU=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\user\\source\\repos\\PLC_pj\\Camera\\finalProject\\finalProject.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\user\\.nuget\\packages\\fontawesome.wpf\\4.7.0.9\\fontawesome.wpf.4.7.0.9.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.ml.onnxruntime\\1.22.1\\microsoft.ml.onnxruntime.1.22.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.ml.onnxruntime.managed\\1.22.1\\microsoft.ml.onnxruntime.managed.1.22.1.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\microsoft.win32.systemevents\\8.0.0\\microsoft.win32.systemevents.8.0.0.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\modernwpfui\\0.9.6\\modernwpfui.0.9.6.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\opencvsharp4\\4.11.0.20250507\\opencvsharp4.4.11.0.20250507.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\opencvsharp4.runtime.win\\4.11.0.20250507\\opencvsharp4.runtime.win.4.11.0.20250507.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\opencvsharp4.wpfextensions\\4.11.0.20250507\\opencvsharp4.wpfextensions.4.11.0.20250507.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.drawing.common\\8.0.11\\system.drawing.common.8.0.11.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.memory\\4.6.3\\system.memory.4.6.3.nupkg.sha512",
+    "C:\\Users\\user\\.nuget\\packages\\system.numerics.tensors\\9.0.0\\system.numerics.tensors.9.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "프로젝트 대상 프레임워크 'net8.0-windows7.0' 대신 '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1'을(를) 사용하여 패키지 'FontAwesome.WPF 4.7.0.9'을(를) 복원했습니다. 이 패키지는 프로젝트와 완벽하게 호환되지 않을 수 있습니다.",
+      "projectPath": "C:\\Users\\user\\source\\repos\\PLC_pj\\Camera\\finalProject\\finalProject.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\user\\source\\repos\\PLC_pj\\Camera\\finalProject\\finalProject.csproj",
+      "libraryId": "FontAwesome.WPF",
+      "targetGraphs": [
+        "net8.0-windows7.0"
+      ]
+    }
+  ]
+}

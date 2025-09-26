@@ -1,0 +1,125 @@
+﻿<Window x:Class="finalProject.Views.WorkersInfo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:finalProject.Views"
+        xmlns:mui="clr-namespace:ModernWpf.Controls;assembly=ModernWpf.Controls"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        mc:Ignorable="d"
+        Title="Workers Information" Height="960" Width="1280" Background="#F3F4F6"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- 경고등 깜박임 -->
+    <Window.Resources>
+        <Storyboard x:Key="SirenBlink" RepeatBehavior="Forever" AutoReverse="True">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1.0" To="0.1" Duration="0:0:0.5"/>
+        </Storyboard>
+
+        <Style x:Key="SirenBlinkStyle" TargetType="TextBlock">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource SirenBlink}"/>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    
+    <Grid x:Name="WorkersGrid" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="320"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Center" Margin="0 0 0 10">
+            <Border CornerRadius="100" BorderBrush="Black" BorderThickness="1" Width="200" Height="200">
+                <!-- image 태그 -->
+            </Border>
+            <TextBlock Text="이름" Margin="10" TextAlignment="Center" FontSize="20"/>
+            <TextBlock Text="품질 검사원" Margin="3" TextAlignment="Center" FontSize="16"/>
+        </StackPanel>
+
+        <UniformGrid Grid.Row="0" Grid.Column="1" Rows="4" Margin="10 0 0 15">
+            <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
+                <UniformGrid Columns="2">
+                    <TextBlock Text="작업자 ID" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="PCB_QC" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                </UniformGrid>
+            </Border>
+
+            <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
+                <UniformGrid Columns="2">
+                    <TextBlock Text="담당 라인" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="라인" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                </UniformGrid>
+            </Border>
+
+            <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
+                <UniformGrid Columns="2">
+                    <TextBlock Text="근무 편성" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="workTime" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                </UniformGrid>
+            </Border>
+
+            <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
+                <UniformGrid Columns="2">
+                    <TextBlock Text="출근 시간" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="startWork" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                </UniformGrid>
+            </Border>
+        </UniformGrid>
+
+        <GroupBox Header="  안전 장비 착용 상태  " Grid.Row="1" Grid.ColumnSpan="2" FontSize="20" FontWeight="SemiBold" Margin="15" BorderBrush="Gray" BorderThickness="1">
+            <UniformGrid Rows="4" Margin="5">
+                <Border x:Name="borderH" Height="70" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <mui:ProgressRing x:Name="progHelmet" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
+                        <fa:ImageAwesome Icon="CheckCircle" x:Name="checkH" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                        <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnH" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
+                        <TextBlock x:Name="helmets" Text="안전모" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="borderV" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <mui:ProgressRing x:Name="progVest" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
+                        <fa:ImageAwesome Icon="CheckCircle" x:Name="checkV" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                        <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnV" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
+                        <TextBlock x:Name="vest" Text="안전 조끼" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="borderG" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <mui:ProgressRing x:Name="progGloves" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
+                        <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                        <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnG" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
+                        <TextBlock x:Name="gloves" Text="안전 장갑" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock x:Name="sirenF" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Style="{StaticResource SirenBlinkStyle}"/>
+                        <TextBlock x:Name="txtAlert" TextAlignment="Center" VerticalAlignment="Center" Margin="10"/>
+                        <TextBlock x:Name="sirenB" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Style="{StaticResource SirenBlinkStyle}"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </GroupBox>
+
+
+        <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
+            <Border Height="70" Background="#00538F" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                <Button Content="작업 시작" Foreground="White" BorderBrush="Transparent" Background="Transparent" VerticalAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
