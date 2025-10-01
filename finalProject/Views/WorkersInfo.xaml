@@ -28,7 +28,7 @@
     
     <Grid x:Name="WorkersGrid" Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="320"/>
+            <RowDefinition Height="350"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
@@ -39,25 +39,25 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Vertical" VerticalAlignment="Center" Margin="0 0 0 10">
-            <Border CornerRadius="100" BorderBrush="Black" BorderThickness="1" Width="200" Height="200">
-                <!-- image 태그 -->
+            <Border CornerRadius="10" Width="200" Height="250">
+                <Image x:Name="imgProfile" Stretch="UniformToFill"/>
             </Border>
-            <TextBlock Text="이름" Margin="10" TextAlignment="Center" FontSize="20"/>
-            <TextBlock Text="품질 검사원" Margin="3" TextAlignment="Center" FontSize="16"/>
+            <TextBlock x:Name="txtWorkerName" Margin="10" TextAlignment="Center" FontSize="20"/>
+            <TextBlock x:Name="txtDepartment" Margin="3" TextAlignment="Center" FontSize="16"/>
         </StackPanel>
 
         <UniformGrid Grid.Row="0" Grid.Column="1" Rows="4" Margin="10 0 0 15">
             <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
                 <UniformGrid Columns="2">
                     <TextBlock Text="작업자 ID" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="PCB_QC" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="txtWorkerId" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
                 </UniformGrid>
             </Border>
 
             <Border Background="#E9ECEF" CornerRadius="2" BorderThickness="1" BorderBrush="#DEE2E6" Height="60">
                 <UniformGrid Columns="2">
                     <TextBlock Text="담당 라인" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="라인" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="txtAssignedLine" TextAlignment="Right" VerticalAlignment="Center" Margin="15" FontSize="16" FontWeight="SemiBold"/>
                 </UniformGrid>
             </Border>
 

@@ -183,3 +183,4 @@ C:\Users\user\source\repos\PLC_pj\Camera\finalProject\obj\Debug\net8.0-windows\f
 C:\Users\user\source\repos\PLC_pj\Camera\finalProject\obj\Debug\net8.0-windows\ref\finalProject.dll
 C:\Users\user\source\repos\PLC_pj\Camera\finalProject\obj\Debug\net8.0-windows\Views\WorkersInfo.g.cs
 C:\Users\user\source\repos\PLC_pj\Camera\finalProject\obj\Debug\net8.0-windows\Views\WorkersInfo.baml
+C:\Users\user\source\repos\PLC_pj\Camera\finalProject\bin\Debug\net8.0-windows\Newtonsoft.Json.dll

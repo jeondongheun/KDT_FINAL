@@ -141,8 +141,6 @@ namespace finalProject
                                             progressRing.Visibility = Visibility.Collapsed;
                                             camera.Visibility = Visibility.Collapsed;
                                             txtCam.Visibility = Visibility.Collapsed;
-
-                                            WorkersCap(_frame, DateTime.Now);
                                         }
                                         catch (Exception uiEx)
                                         {
@@ -240,7 +238,6 @@ namespace finalProject
 
             try
             {
-                // SafetyCheck.Dispose(); // 모델 리소스 해제
                 SafetyCheck.Cleanup();
             }
             catch (Exception ex)
@@ -250,28 +247,6 @@ namespace finalProject
 
             Console.WriteLine("앱 종료 완료");
             base.OnClosing(e);
-        }
-
-        // 직원 촬영
-        // 얼굴 인식 가능해지면 사람마다 폴더 생성, 파일명 사람 이름으로 매칭, 사람당 하루에 한 번 촬영
-        private void WorkersCap(Mat video, DateTime now)
-        {
-            string folder = @"C:\Users\user\Desktop\Workers";
-
-            // 폴더가 없으면 폴더 생성
-            if (!System.IO.Directory.Exists(folder))
-            {
-                System.IO.Directory.CreateDirectory(folder);
-            }
-
-            string timeStamp = now.ToString("yyyy-MM-dd_HH-mm-ss");
-
-            // Mat 복사본 생성 (원본 보호)
-            using (Mat safeCopy = video.Clone())
-            {
-                string workersImg = Path.Combine(folder, $"이름_{timeStamp}.jpg");
-                Cv2.ImWrite(workersImg, safeCopy);
-            }
         }
     }
 }

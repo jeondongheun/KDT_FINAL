@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Rect = OpenCvSharp.Rect;
 using Size = OpenCvSharp.Size;
 
@@ -208,7 +209,26 @@ namespace finalProject.Models
                     try
                     {
                         await Task.Delay(3000);
-                        
+
+                        // 이미지 캡처
+                        string capturedImagePath = await CaptureWorkerImage(frame);
+
+                        // 얼굴 인식 실행
+                        Worker recognizedWorker = null;
+                        if (!string.IsNullOrEmpty(capturedImagePath))
+                        {
+                            recognizedWorker = await FaceRecognitionService.RecognizeFaceAsync(capturedImagePath);
+
+                            if (recognizedWorker != null)
+                            {
+                                Console.WriteLine($"작업자 인식 성공: {recognizedWorker.Name}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("작업자 인식 실패");
+                            }
+                        }
+
                         // 카메라 완전 중단
                         MainWin.StopCamera();
 
@@ -220,7 +240,7 @@ namespace finalProject.Models
 
                         // WorkersInfo 출력
                         WorkersWin.Show();
-                        UpdateWorkersInfo(hasHelmet, hasVest, hasGloves);
+                        UpdateWorkersInfo(hasHelmet, hasVest, hasGloves, recognizedWorker);
 
                         Debug.WriteLine("안전 장비 착용 확인 - 작업자 정보 확인 요망");
                     }
@@ -263,9 +283,39 @@ namespace finalProject.Models
             // 화면에 상태 표시
             DrawPPEStatus(frame, person, hasHelmet, hasVest, hasGloves);
         }
+        
+        // PPE 착용 여부와 무관하게 작업자 캡처
+        private static async Task<string> CaptureWorkerImage(Mat frame)
+        {
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    string folder = @"C:\Users\user\Desktop\Workers";
+                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
-        // 안전 장비 위반 시 이미지 캡처
-        // 출입 카메라에서 착용 여부와 무관하게 촬영하는 것에 +a
+                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                    string filename = $"Worker_Capture_{timestamp}.jpg";
+                    string fullPath = Path.Combine(folder, filename);
+
+                    using (Mat safeCopy = frame.Clone())
+                    {
+                        if (!safeCopy.Empty())
+                        {
+                            Cv2.ImWrite(fullPath, safeCopy);
+                            Console.WriteLine($"작업자 이미지 캡처: {fullPath}");
+                            return fullPath;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"작업자 이미지 캡처 오류: {ex.Message}");
+                }
+                return null;
+            });
+        }
+
         // 안전 장비 위반 시 이미지 캡처
         private static async Task<string> CaptureViolationImage(Mat frame)
         {
@@ -396,12 +446,59 @@ namespace finalProject.Models
             });
         }
 
-        private static void UpdateWorkersInfo(bool hasHelmet, bool hasVest, bool hasGloves)
+        private static void UpdateWorkersInfo(bool hasHelmet, bool hasVest, bool hasGloves, Worker worker)
         {
             WorkersWin?.Dispatcher.BeginInvoke(() =>
             {
                 var currentTime = DateTime.Now;
                 WorkersWin.startWork.Text = $"{currentTime:T}";
+
+                // 작업자 정보 표시
+                if (worker != null)
+                {
+                    // WorkersInfo.xaml에 작업자 정보를 표시할 TextBlock들이 있다고 가정
+                    // 실제 컨트롤 이름에 맞게 수정하세요
+                    if (WorkersWin.txtWorkerName != null)
+                        WorkersWin.txtWorkerName.Text = worker.Name;
+
+                    if (WorkersWin.txtWorkerId != null)
+                        WorkersWin.txtWorkerId.Text = worker.WorkerId;
+
+                    if (WorkersWin.txtDepartment != null)
+                        WorkersWin.txtDepartment.Text = worker.Department;
+
+                    if (WorkersWin.txtAssignedLine != null)
+                        WorkersWin.txtAssignedLine.Text = worker.AssignedLine + " 라인";
+
+                    // 프로필 이미지
+                    if (worker != null && !string.IsNullOrEmpty(worker.ProfileImagePath))
+                    {
+                        try
+                        {
+                            // Debug 폴더 내 이미지 경로
+                            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, worker.ProfileImagePath);
+
+                            if (File.Exists(imagePath))
+                            {
+                                WorkersWin.imgProfile.Source = new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+                            }
+                            else
+                            {
+                                Console.WriteLine($"프로필 이미지를 찾을 수 없습니다: {imagePath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"프로필 이미지 로드 오류: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    // 인식 실패 시
+                    if (WorkersWin.txtWorkerName != null)
+                        WorkersWin.txtWorkerName.Text = "인식 실패";
+                }
 
                 // 헬멧 상태
                 WorkersWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
