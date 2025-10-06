@@ -42,6 +42,12 @@ namespace finalProject
             SafetyCheck.MainWin = this;
             SafetyCheck.InitializeModel();
 
+            // PPE 체크 후 UI 업데이트
+            SafetyCheckUI.MainWin = this;
+
+            // 이메일 전송 코드 초기화
+            SafetyAlert.Initialize();
+
             // 창 로드 시 자동 실행
             this.Loaded += MainWindow_Loaded;
         }
@@ -55,7 +61,7 @@ namespace finalProject
             }
         }
 
-        private async Task StartCameraAsync()
+        public async Task StartCameraAsync()
         {
             if (_isRunning || _isClosing) return;
 

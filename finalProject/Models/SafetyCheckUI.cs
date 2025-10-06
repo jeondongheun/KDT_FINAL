@@ -1,0 +1,177 @@
+﻿using finalProject.Views;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
+namespace finalProject.Models
+{
+    internal class SafetyCheckUI
+    {
+        public static MainWindow MainWin { get; set; }
+        public static WorkersInfo WorkersWin { get; set; }
+
+        // PPE UI 상태 업데이트
+        public static void UpdatePPEUI(bool hasHelmet, bool hasVest, bool hasGloves)
+        {
+            MainWin?.Dispatcher.BeginInvoke(() =>
+            {
+                // 헬멧 상태
+                MainWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasHelmet ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                MainWin.helmets?.SetCurrentValue(TextBlock.TextProperty, hasHelmet ? "안전모 착용" : "안전모 미착용");
+                MainWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Visible : Visibility.Collapsed);
+                MainWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Collapsed : Visibility.Visible);
+
+                // 조끼 상태
+                MainWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasVest ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                MainWin.vest?.SetCurrentValue(TextBlock.TextProperty, hasVest ? "안전 조끼 착용" : "안전 조끼 미착용");
+                MainWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Visible : Visibility.Collapsed);
+                MainWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Collapsed : Visibility.Visible);
+
+                // 장갑 상태
+                MainWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasGloves ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                MainWin.gloves?.SetCurrentValue(TextBlock.TextProperty, hasGloves ? "안전 장갑 착용" : "안전 장갑 미착용");
+                MainWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Visible : Visibility.Collapsed);
+                MainWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Collapsed : Visibility.Visible);
+            });
+        }
+
+        // PPE UI를 로딩 상태로 리셋
+        public static void ResetPPEUI()
+        {
+            MainWin?.Dispatcher.BeginInvoke(() =>
+            {
+                // 모든 PPE를 로딩 상태로 리셋
+                MainWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
+                MainWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
+                MainWin.helmets?.SetCurrentValue(TextBlock.TextProperty, "안전모");
+                MainWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+
+                MainWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
+                MainWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
+                MainWin.vest?.SetCurrentValue(TextBlock.TextProperty, "안전 조끼");
+                MainWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+
+                MainWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
+                MainWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
+                MainWin.gloves?.SetCurrentValue(TextBlock.TextProperty, "안전 장갑");
+                MainWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                MainWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+            });
+        }
+
+        public static void UpdateWorkersInfo(bool hasHelmet, bool hasVest, bool hasGloves, Worker worker)
+        {
+            WorkersWin?.Dispatcher.BeginInvoke(() =>
+            {
+                var currentTime = DateTime.Now;
+                WorkersWin.startWork.Text = $"{currentTime:T}";
+
+                // 작업자 정보 표시
+                if (worker != null)
+                {
+                    // WorkersInfo.xaml에 작업자 정보를 표시할 TextBlock들이 있다고 가정
+                    // 실제 컨트롤 이름에 맞게 수정하세요
+                    if (WorkersWin.txtWorkerName != null)
+                        WorkersWin.txtWorkerName.Text = worker.Name;
+
+                    if (WorkersWin.txtWorkerId != null)
+                        WorkersWin.txtWorkerId.Text = worker.WorkerId;
+
+                    if (WorkersWin.txtDepartment != null)
+                        WorkersWin.txtDepartment.Text = worker.Department;
+
+                    if (WorkersWin.txtAssignedLine != null)
+                        WorkersWin.txtAssignedLine.Text = worker.AssignedLine + " 라인";
+
+                    // 프로필 이미지
+                    if (worker != null && !string.IsNullOrEmpty(worker.ProfileImagePath))
+                    {
+                        try
+                        {
+                            // Debug 폴더 내 이미지 경로
+                            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, worker.ProfileImagePath);
+
+                            if (File.Exists(imagePath))
+                            {
+                                WorkersWin.imgProfile.Source = new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"프로필 이미지를 찾을 수 없습니다: {imagePath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"프로필 이미지 로드 오류: {ex.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    // 인식 실패 시
+                    if (WorkersWin.txtWorkerName != null)
+                        WorkersWin.txtWorkerName.Text = "인식 실패";
+                }
+
+                // 헬멧 상태
+                WorkersWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                WorkersWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasHelmet ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Visible : Visibility.Collapsed);
+                WorkersWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Collapsed : Visibility.Visible);
+
+                // 조끼 상태
+                WorkersWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                WorkersWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasVest ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Visible : Visibility.Collapsed);
+                WorkersWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Collapsed : Visibility.Visible);
+
+                // 장갑 상태
+                WorkersWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+                WorkersWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasGloves ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Visible : Visibility.Collapsed);
+                WorkersWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Collapsed : Visibility.Visible);
+
+                // txtAlert에 현재 PPE 착용 상태 표시
+                if (WorkersWin.txtAlert != null)
+                {
+                    var missingItems = new List<string>();
+                    if (!hasHelmet) missingItems.Add("안전모");
+                    if (!hasVest) missingItems.Add("안전 조끼");
+                    if (!hasGloves) missingItems.Add("안전 장갑");
+
+                    if (missingItems.Count == 0)
+                    {
+                        WorkersWin.txtAlert.Text = "모든 안전 장비 착용 완료";
+                    }
+                    else
+                    {
+                        WorkersWin.txtAlert.Text = $"안전 장비 착용 후 입장해 주세요.";
+                    }
+                }
+
+                // 근무 시간 판별
+                int hour = currentTime.Hour;
+
+                if (hour >= 6 && hour < 14)
+                    WorkersWin.workTime.Text = "오전";
+                else if (hour >= 14 && hour < 22)
+                    WorkersWin.workTime.Text = "오후";
+                else
+                    WorkersWin.workTime.Text = "야간";
+            });
+        }
+    }
+}

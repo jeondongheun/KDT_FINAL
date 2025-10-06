@@ -30,13 +30,17 @@ namespace finalProject.Models
 
         // 이메일 알림 관련
         private static DateTime lastEmailAlert = DateTime.MinValue;
-        private static readonly TimeSpan emailCooldown = TimeSpan.FromMinutes(2);
+        private static readonly TimeSpan emailCooldown = TimeSpan.FromHours(6);
 
         // ONNX 모델 세션
         private static InferenceSession session;
 
         // WorkersInfo로 화면 전환 시 MainWindow 동작 정지
         private static bool isProcessingActive = true;
+
+        private static string currentWorkerId = null;
+        private static DateTime lastFaceRecognitionTime = DateTime.MinValue;
+        private static readonly TimeSpan faceRecognitionInterval = TimeSpan.FromSeconds(10);
 
         public static void InitializeModel()
         {
@@ -50,6 +54,20 @@ namespace finalProject.Models
 
             try
             {
+                if (DateTime.Now - lastFaceRecognitionTime > faceRecognitionInterval)
+                {
+                    lastFaceRecognitionTime = DateTime.Now;
+                    _ = TryRecognizeFaceAsync(frame);
+                }
+
+                if (!string.IsNullOrEmpty(currentWorkerId) &&
+                    WorkerSessionManager.IsPPEChecked(currentWorkerId))
+                {
+                    return frame;
+                }
+
+                Debug.WriteLine("YOLO 모델 실행 중...");
+
                 // 이미지 전처리
                 Mat resized = new Mat();
                 Cv2.CvtColor(frame, resized, ColorConversionCodes.BGR2RGB);
@@ -149,27 +167,58 @@ namespace finalProject.Models
                 // 사람이 감지된 경우만 PPE 분석
                 if (persons.Count > 0)
                 {
-                    Console.WriteLine($"Person detected: {persons.Count}명");
+                    Debug.WriteLine($"Person detected: {persons.Count}명");
+
                     foreach (var person in persons)
                     {
                         AnalyzePPEStatus(frame, person, helmets, vests, gloves);
                     }
+
+                    if (!string.IsNullOrEmpty(currentWorkerId))
+                    {
+                        WorkerSessionManager.MarkAsCaptured(currentWorkerId);
+                        Debug.WriteLine($"{currentWorkerId} - PPE 검사 완료 표시");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("No person detected");
+                    Debug.WriteLine("No person detected");
                     // 사람이 감지되지 않으면 UI를 로딩 상태로 리셋
-                    ResetPPEUI();
+                    SafetyCheckUI.ResetPPEUI();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"프레임 처리 오류: {ex.Message}");
+                Debug.WriteLine($"프레임 처리 오류: {ex.Message}");
             }
 
             return frame;
         }
 
+        // 비동기 안면 인식
+        private static async Task TryRecognizeFaceAsync(Mat frame)
+        {
+            try
+            {
+                Worker recognizedWorker = await FaceRecognitionService.RecognizeFaceAsync(frame);
+
+                if (recognizedWorker != null)
+                {
+                    currentWorkerId = recognizedWorker.WorkerId;
+                    Debug.WriteLine($"작업자 인식: {recognizedWorker.Name} ({currentWorkerId})");
+                }
+                else
+                {
+                    Debug.WriteLine("작업자 인식 실패");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"안면 인식 오류: {ex.Message}");
+            }
+        }
+
+        // PPE 착용 여부 확인
         private static void AnalyzePPEStatus(Mat frame,
             (int x1, int y1, int x2, int y2, float score) person,
             List<(int x1, int y1, int x2, int y2)> helmets,
@@ -185,10 +234,10 @@ namespace finalProject.Models
                                                          g.x1, g.y1, g.x2, g.y2));
 
             // 디버깅용 로그
-            Console.WriteLine($"PPE Status - Helmet: {hasHelmet}, Vest: {hasVest}, Gloves: {hasGloves}");
+            Debug.WriteLine($"PPE Status - Helmet: {hasHelmet}, Vest: {hasVest}, Gloves: {hasGloves}");
 
             // UI 업데이트
-            UpdatePPEUI(hasHelmet, hasVest, hasGloves);
+            SafetyCheckUI.UpdatePPEUI(hasHelmet, hasVest, hasGloves);
 
             // PPE 착용 여부 - 안전모 필착
             bool entryViolation = !hasHelmet;
@@ -198,7 +247,7 @@ namespace finalProject.Models
             }
 
             // 헬멧 착용 시 MainWindow → WorkersInfo로 페이지 전환
-            if (entryViolation)
+            if (!entryViolation)
             {
                 // MainWindow 카메라 정지
                 isProcessingActive = false;
@@ -211,7 +260,7 @@ namespace finalProject.Models
                         await Task.Delay(3000);
 
                         // 이미지 캡처
-                        string capturedImagePath = await CaptureWorkerImage(frame);
+                        string capturedImagePath = await WorkersCap.CaptureWorkerImage(frame);
 
                         // 얼굴 인식 실행
                         Worker recognizedWorker = null;
@@ -221,11 +270,24 @@ namespace finalProject.Models
 
                             if (recognizedWorker != null)
                             {
-                                Console.WriteLine($"작업자 인식 성공: {recognizedWorker.Name}");
+                                Debug.WriteLine($"작업자 인식 성공: {recognizedWorker.Name}");
+
+                                // 중복 출근 체크
+                                if (!WorkerSessionManager.TryCheckIn(recognizedWorker.WorkerId))
+                                {
+                                    // 이미 출근한 작업자
+                                    MessageBox.Show($"{recognizedWorker.Name} 님은 이미 출근 처리되었습니다.\n");
+
+                                    // 카메라 재시작하고 메인 화면 유지
+                                    isProcessingActive = true;
+                                    await MainWin.StartCameraAsync();
+                                    return;
+                                }
+                                WorkerSessionManager.MarkAsCaptured(recognizedWorker.WorkerId);
                             }
                             else
                             {
-                                Console.WriteLine("작업자 인식 실패");
+                                Debug.WriteLine("작업자 인식 실패");
                             }
                         }
 
@@ -240,13 +302,13 @@ namespace finalProject.Models
 
                         // WorkersInfo 출력
                         WorkersWin.Show();
-                        UpdateWorkersInfo(hasHelmet, hasVest, hasGloves, recognizedWorker);
+                        SafetyCheckUI.UpdateWorkersInfo(hasHelmet, hasVest, hasGloves, recognizedWorker);
 
                         Debug.WriteLine("안전 장비 착용 확인 - 작업자 정보 확인 요망");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"화면 전환 오류: {ex.Message}");
+                        Debug.WriteLine($"화면 전환 오류: {ex.Message}");
                     }
                 });
 
@@ -266,286 +328,57 @@ namespace finalProject.Models
                 {
                     try
                     {
-                        // PPE 미착용 시 화면 추가 캡처
-                        await CaptureViolationImage(frame);
-                        
+                        string tempCapturePath = await WorkersCap.CaptureWorkerImage(frame);
+
+                        Worker recognizedWorker = null;
+
+                        if (!string.IsNullOrEmpty(tempCapturePath))
+                        {
+                            recognizedWorker = await FaceRecognitionService.RecognizeFaceAsync(tempCapturePath);
+
+                            // 안면 인식용 캡처 삭제
+                            try { File.Delete(tempCapturePath); } catch { }
+                        }
+
+                        // WorkerId 확보 (인식 실패 시 "UNKNOWN")
+                        string workerId = recognizedWorker?.WorkerId ?? "UNKNOWN";
+
+                        // 인식된 작업자가 이미 캡처되었는지 확인
+                        bool shouldCapture = true;
+                        if (recognizedWorker != null)
+                        {
+                            if (WorkerSessionManager.WorkersImageCap(workerId))
+                            {
+                                Debug.WriteLine($"{workerId}는 이미 캡처 완료됨. 추가 캡처 생략.");
+                                shouldCapture = false;
+                            }
+                            else
+                            {
+                                // 첫 캡처이면 마킹
+                                WorkerSessionManager.MarkAsCaptured(workerId);
+                            }
+                        }
+
+                        // 캡처가 필요한 경우에만 저장
+                        if (shouldCapture)
+                        {
+                            await WorkersCap.CaptureWorkerImage(frame);
+                            await WorkersCap.CaptureViolationImage(frame);
+                            Debug.WriteLine($"{workerId} PPE 미착용 이미지 캡처 완료");
+                        }
+
                         // 통합 알림으로 여섯 시간에 한 번 메일 전송
-                        // 개별 알림은 관리자 메일함이 터질 수 있음......
-                        await SafetyAlert.ProcessViolation(!hasHelmet, !hasVest, !hasGloves);
+                        await SafetyAlert.ProcessViolation(workerId, !hasHelmet, !hasVest, !hasGloves);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"이메일 알림 처리 오류: {ex.Message}");
+                        Debug.WriteLine($"이메일 알림 처리 오류: {ex.Message}");
                     }
                 });
             }
 
             // 화면에 상태 표시
-            DrawPPEStatus(frame, person, hasHelmet, hasVest, hasGloves);
-        }
-        
-        // PPE 착용 여부와 무관하게 작업자 캡처
-        private static async Task<string> CaptureWorkerImage(Mat frame)
-        {
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    string folder = @"C:\Users\user\Desktop\Workers";
-                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                    string filename = $"Worker_Capture_{timestamp}.jpg";
-                    string fullPath = Path.Combine(folder, filename);
-
-                    using (Mat safeCopy = frame.Clone())
-                    {
-                        if (!safeCopy.Empty())
-                        {
-                            Cv2.ImWrite(fullPath, safeCopy);
-                            Console.WriteLine($"작업자 이미지 캡처: {fullPath}");
-                            return fullPath;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"작업자 이미지 캡처 오류: {ex.Message}");
-                }
-                return null;
-            });
-        }
-
-        // 안전 장비 위반 시 이미지 캡처
-        private static async Task<string> CaptureViolationImage(Mat frame)
-        {
-            return await Task.Run(() =>
-            {
-                try
-                {
-                    string folder = @"C:\Users\user\Desktop\Workers\Safety_Equipment_Violations";
-                    if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
-                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-                    string filename = $"Safety_Violation_{timestamp}.jpg";
-                    string fullPath = Path.Combine(folder, filename);
-
-                    // 안전한 복사본으로 이미지 저장
-                    using (Mat safeCopy = frame.Clone())
-                    {
-                        if (!safeCopy.Empty())
-                        {
-                            Cv2.ImWrite(fullPath, safeCopy);
-                            Console.WriteLine($"안전 장비 위반 이미지 저장: {fullPath}");
-                            return fullPath;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"이미지 캡처 오류: {ex.Message}");
-                }
-                return null;
-            });
-        }
-
-        private static void DrawPPEStatus(Mat frame,
-            (int x1, int y1, int x2, int y2, float score) person,
-            bool hasHelmet, bool hasVest, bool hasGloves)
-        {
-            // 전체 PPE 준수 여부에 따른 색상 결정
-            bool allCompliant = hasHelmet && hasVest && hasGloves;
-            Scalar boxColor = allCompliant ? Scalar.Green : Scalar.Red;
-            string statusText = allCompliant ? "Safety Compliance" : "PPE inspection required";
-
-            // 바운딩 박스 그리기
-            int boxWidth = person.x2 - person.x1;
-            int boxHeight = person.y2 - person.y1;
-
-            float scale = 0.6f;
-            int newWidth = (int)(boxWidth * scale);
-            int newHeight = (int)(boxHeight * scale);
-            int newX = person.x1 + (boxWidth - newWidth) / 2;
-            int newY = person.y1;
-
-            // 메인 상태 박스
-            Cv2.Rectangle(frame, new Rect(newX, newY + 30, statusText.Length * 8, 20), boxColor, -1);
-            Cv2.Rectangle(frame, new Rect(newX, newY + 50, newWidth, newHeight), boxColor, 2);
-            Cv2.PutText(frame, statusText, new OpenCvSharp.Point(newX + 3, newY + 45),
-                        HersheyFonts.HersheySimplex, 0.4, Scalar.White, 1);
-
-            // PPE 상세 상태
-            var ppeStatus = new List<string>
-            {
-                $"헬멧: {(hasHelmet ? "✓" : "✗")}",
-                $"조끼: {(hasVest ? "✓" : "✗")}",
-                $"장갑: {(hasGloves ? "✓" : "✗")}"
-            };
-
-            int yOffset = newY + newHeight + 70;
-            for (int i = 0; i < ppeStatus.Count; i++)
-            {
-                Scalar textColor = ppeStatus[i].Contains("✓") ? Scalar.Green : Scalar.Red;
-                Cv2.PutText(frame, ppeStatus[i],
-                           new OpenCvSharp.Point(newX, yOffset + i * 15),
-                           HersheyFonts.HersheyComplex, 0.3, textColor, 1);
-            }
-        }
-
-        // PPE UI 상태 업데이트
-        private static void UpdatePPEUI(bool hasHelmet, bool hasVest, bool hasGloves)
-        {
-            MainWin?.Dispatcher.BeginInvoke(() =>
-            {
-                // 헬멧 상태
-                MainWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasHelmet ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                MainWin.helmets?.SetCurrentValue(TextBlock.TextProperty, hasHelmet ? "안전모 착용" : "안전모 미착용");
-                MainWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Visible : Visibility.Collapsed);
-                MainWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Collapsed : Visibility.Visible);
-
-                // 조끼 상태
-                MainWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasVest ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                MainWin.vest?.SetCurrentValue(TextBlock.TextProperty, hasVest ? "안전 조끼 착용" : "안전 조끼 미착용");
-                MainWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Visible : Visibility.Collapsed);
-                MainWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Collapsed : Visibility.Visible);
-
-                // 장갑 상태
-                MainWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasGloves ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                MainWin.gloves?.SetCurrentValue(TextBlock.TextProperty, hasGloves ? "안전 장갑 착용" : "안전 장갑 미착용");
-                MainWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Visible : Visibility.Collapsed);
-                MainWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Collapsed : Visibility.Visible);
-            });
-        }
-
-        // PPE UI를 로딩 상태로 리셋
-        private static void ResetPPEUI()
-        {
-            MainWin?.Dispatcher.BeginInvoke(() =>
-            {
-                // 모든 PPE를 로딩 상태로 리셋
-                MainWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
-                MainWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
-                MainWin.helmets?.SetCurrentValue(TextBlock.TextProperty, "안전모");
-                MainWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-
-                MainWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
-                MainWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
-                MainWin.vest?.SetCurrentValue(TextBlock.TextProperty, "안전 조끼");
-                MainWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-
-                MainWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Visible);
-                MainWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(240, 245, 255)));
-                MainWin.gloves?.SetCurrentValue(TextBlock.TextProperty, "안전 장갑");
-                MainWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                MainWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-            });
-        }
-
-        private static void UpdateWorkersInfo(bool hasHelmet, bool hasVest, bool hasGloves, Worker worker)
-        {
-            WorkersWin?.Dispatcher.BeginInvoke(() =>
-            {
-                var currentTime = DateTime.Now;
-                WorkersWin.startWork.Text = $"{currentTime:T}";
-
-                // 작업자 정보 표시
-                if (worker != null)
-                {
-                    // WorkersInfo.xaml에 작업자 정보를 표시할 TextBlock들이 있다고 가정
-                    // 실제 컨트롤 이름에 맞게 수정하세요
-                    if (WorkersWin.txtWorkerName != null)
-                        WorkersWin.txtWorkerName.Text = worker.Name;
-
-                    if (WorkersWin.txtWorkerId != null)
-                        WorkersWin.txtWorkerId.Text = worker.WorkerId;
-
-                    if (WorkersWin.txtDepartment != null)
-                        WorkersWin.txtDepartment.Text = worker.Department;
-
-                    if (WorkersWin.txtAssignedLine != null)
-                        WorkersWin.txtAssignedLine.Text = worker.AssignedLine + " 라인";
-
-                    // 프로필 이미지
-                    if (worker != null && !string.IsNullOrEmpty(worker.ProfileImagePath))
-                    {
-                        try
-                        {
-                            // Debug 폴더 내 이미지 경로
-                            string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, worker.ProfileImagePath);
-
-                            if (File.Exists(imagePath))
-                            {
-                                WorkersWin.imgProfile.Source = new BitmapImage(new Uri(imagePath, UriKind.Absolute));
-                            }
-                            else
-                            {
-                                Console.WriteLine($"프로필 이미지를 찾을 수 없습니다: {imagePath}");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"프로필 이미지 로드 오류: {ex.Message}");
-                        }
-                    }
-                }
-                else
-                {
-                    // 인식 실패 시
-                    if (WorkersWin.txtWorkerName != null)
-                        WorkersWin.txtWorkerName.Text = "인식 실패";
-                }
-
-                // 헬멧 상태
-                WorkersWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                WorkersWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasHelmet ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                WorkersWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Visible : Visibility.Collapsed);
-                WorkersWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Collapsed : Visibility.Visible);
-
-                // 조끼 상태
-                WorkersWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                WorkersWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasVest ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                WorkersWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Visible : Visibility.Collapsed);
-                WorkersWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Collapsed : Visibility.Visible);
-
-                // 장갑 상태
-                WorkersWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-                WorkersWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasGloves ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
-                WorkersWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Visible : Visibility.Collapsed);
-                WorkersWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Collapsed : Visibility.Visible);
-
-                // txtAlert에 현재 PPE 착용 상태 표시
-                if (WorkersWin.txtAlert != null)
-                {
-                    var missingItems = new List<string>();
-                    if (!hasHelmet) missingItems.Add("안전모");
-                    if (!hasVest) missingItems.Add("안전 조끼");
-                    if (!hasGloves) missingItems.Add("안전 장갑");
-
-                    if (missingItems.Count == 0)
-                    {
-                        WorkersWin.txtAlert.Text = "모든 안전 장비 착용 완료";
-                    }
-                    else
-                    {
-                        WorkersWin.txtAlert.Text = $"안전 장비 착용 후 입장해 주세요.";
-                    }
-                }
-
-                // 근무 시간 판별
-                int hour = currentTime.Hour;
-
-                if (hour >= 6 && hour < 14)
-                    WorkersWin.workTime.Text = "오전";
-                else if (hour >= 14 && hour < 22)
-                    WorkersWin.workTime.Text = "오후";
-                else
-                    WorkersWin.workTime.Text = "야간";
-            });
+            WorkersCap.DrawPPEStatus(frame, person, hasHelmet, hasVest, hasGloves);
         }
 
         // 사각형 겹침 여부 판단 (좀 더 관대하게)
@@ -557,6 +390,21 @@ namespace finalProject.Models
 
             // 겹치는 영역의 최소 크기 조건을 완화
             return x_overlap > 10 && y_overlap > 10;
+        }
+
+        // 24시간에 한 번씩 세션 초기화
+        public static void StartDailyResetTimer()
+        {
+            var timer = new Timer(_ =>
+            {
+                var now = DateTime.Now;
+
+                // 매일 자정에 세션 초기화
+                if (now.Hour == 0 && now.Minute == 0)
+                {
+                    WorkerSessionManager.ResetDailySessions();
+                }
+            }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
         }
 
         public static void Cleanup()

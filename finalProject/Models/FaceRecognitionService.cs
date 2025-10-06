@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
+// 안면 인식용 cs 파일
 namespace finalProject.Models
 {
     internal class FaceRecognitionService
