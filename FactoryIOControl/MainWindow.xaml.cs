@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Printing;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -43,9 +44,16 @@ namespace FactoryIOControl
         private const int INPUT_ITEM_DETECTED = 14;
         private const int INPUT_ERROR_DERECTED = 29;
         private const int INPUT_PROD_COUNTER = 34;
+        private const int INPUT_ERROR_COUNTER = 44;
         private const int INPUT_NORMAL_SENSOR = 40;
         private const int INPUT_ERROR_SORT_SENSOR = 42;
         private const int INPUT_ERROR_CATE_SENSOR = 43;
+        private const int INPUT_NORAML_BOX = 47;
+        private const int INPUT_ERROR_BOX = 48;
+        private const int INPUT_STACKER_MOVING_X = 56;
+        private const int INPUT_STACKER_MOVING_Z = 57;
+        private const int INPUT_ERROR_STACKER_MOVING_X = 54;
+        private const int INPUT_ERROR_STACKER_MOVING_Z = 55;
 
         // Factory IO Coil addresses (액추에이터 - Factory IO가 읽음)
         private const int COIL_LIDS_CENTER_START = 8;
@@ -72,12 +80,25 @@ namespace FactoryIOControl
         private const int COIL_CURVED_EXIT_L2 = 23;
         private const int COIL_CURVED_EXIT_B2 = 19;
         private const int COIL_BOX_EMITTER = 10;
+        private const int COIL_ERROR_BOX_EMITTER = 18;
         private const int COIL_NORMAL_PUSHER = 31;
         private const int COIL_NORMAL_ROLLER = 37;
         private const int COIL_LOADING_NORAML = 38;
+        private const int COIL_LOADING_ERROR = 46;
         private const int COIL_CURVED_CONVC = 36;
         private const int COIL_SORT_CONVC = 39;
+        private const int COIL_DEL_PCB = 30;
         private const int COIL_NORMAL_SORT = 41;
+        private const int COIL_ERROR_PUSHER = 44;
+        private const int COIL_ERROR_ROLLER = 45;
+        private const int COIL_STACKER_RIGHT = 53;     // Stacker Crane 0 (Right)
+        private const int COIL_STACKER_LIFT = 52;      // Stacker Crane 0 Lift
+        private const int COIL_STACKER_LEFT = 54;
+        private const int COIL_ERROR_STACKER_RIGHT = 51;     // Stacker Crane 0 (Right)
+        private const int COIL_ERROR_STACKER_LIFT = 50;      // Stacker Crane 0 Lift
+        private const int COIL_ERROR_STACKER_LEFT = 49;
+        private const int REGISTER_ERROR_STACKER_TARGET_POS = 0;
+        private const int REGISTER_STACKER_TARGET_POS = 1;
 
         // Internal PLC logic variables
         private bool basesAtEntryPrev = false;
@@ -115,14 +136,28 @@ namespace FactoryIOControl
 
         private bool prodAtPusherPrev = false;
         private bool productsPusher = false;
+        private bool errorPusher = false;
         private bool prodCounterPrev = false;
-        private bool boxNeeded = false;
-        private bool rollerActive = false;
+        private bool errorCounterPrev = false;
+        private bool prodsBoxNeeded = false;
+        private bool errorsBoxNeeded = false;
+        private bool prodsRollerActive = false;
+        private bool errorsRollerActive = false;
         private bool loadingNormal = false;
         private bool normalroller = false;
         private bool prodCounterWasHigh = false;
+        private bool errorCounterWasHigh = false;
         private bool rollerstop = false;
         private bool normalSortStop = false;
+        private bool deletePCBStop = false;
+        private bool errorEnterPrev = false;
+        private bool errorSortConvStop = false;
+        private bool normalBoxEnterPrev = false;
+        private bool errorBoxEnterPrev = false;
+        private bool normalBoxLoadingConv = false;
+        private bool errorBoxLoadingConv = false;
+        private bool stackerMovingXPrev = false;
+        private bool stackerMovingZPrev = false;
 
         private int lidsClampDelayTimer = 0;
         private int basesClampDelayTimer = 0;
@@ -133,12 +168,28 @@ namespace FactoryIOControl
         private int pusherTimer = 0;
         private const int PUSHER_ACTIVE_TIME = 20; // 1초 = 20 * 50ms
         private int productCount = 0;
-        private int rollerTimer = 0;
-        private const int ROLLER_ACTIVE_TIME = 100;
+        private int errorCount = 0;
+        private int prodRollerTimer = 0;
+        private int errorRollerTimer = 0;
+        private const int ROLLER_ACTIVE_TIME = 170;
+        private const int ERROR_ROLLER_ACTIVE_TIME = 170;
         private int convStopDelayTimer = 0;
         private const int CONV_STOP_DELAY = 40;
         private bool waitingToStopConv = false;
         private bool normalSensorPrev = false;
+        private bool errorCateSensorPrev = false;
+        private int errorSortConvStopTimer = 0;  // 타이머 추가
+        private const int ERROR_SORT_CONV_RESTART_DELAY = 40; // 2초 = 40 * 50ms
+        private int errorPusherTimer = 0;
+        private const int ERROR_PUSHER_ACTIVE_TIME = 20; // 1초 = 20 * 50ms
+        private int stackerState = 0;
+        private int stackerTimer = 0;
+        private bool stackerBusy = false;
+        private ushort stackerTargetPosition = 1;      // Stacker 좌표 이동 값
+        private int errorStackerState = 0;
+        private int errorStackerTimer = 0;
+        private bool errorStackerBusy = false;
+        private ushort errorStackerTargetPosition = 1;      // Stacker 좌표 이동 값
 
         public MainWindow()
         {
@@ -626,10 +677,10 @@ namespace FactoryIOControl
 
                 case 2:  // Grab Lids
                     grabLidsActive = true;
-                    lidsClampActive = false;
                     stateTimer++;
-                    if (stateTimer >= 5)
+                    if (stateTimer >= 7)
                     {
+                        lidsClampActive = false;
                         assemblyState = 3;
                         stateTimer = 0;
                     }
@@ -667,10 +718,10 @@ namespace FactoryIOControl
 
                 case 6:  // Grab 해제 (Lids를 Bases 위에 놓기)
                     grabLidsActive = false;
-                    basesClampActive = false;
                     stateTimer++;
-                    if (stateTimer >= 5)
+                    if (stateTimer >= 7)
                     {
+                        basesClampActive = false;   
                         assemblyState = 7;
                         stateTimer = 0;
                     }
@@ -730,9 +781,9 @@ namespace FactoryIOControl
                 convWithSensorStopTimer = 0;
 
                 // 롤러가 동작 중이 아닐 때만 박스 요청
-                if (!rollerActive)
+                if (!prodsRollerActive)
                 {
-                    boxNeeded = true;  // 박스 필요 플래그
+                    prodsBoxNeeded = true;  // 박스 필요 플래그
                 }
             }
 
@@ -788,22 +839,440 @@ namespace FactoryIOControl
             prodCounterPrev = prodCounterCurrent;
 
             // 4. 박스에 3개 담기면 롤러 가동 (기존 코드 유지)
-            if (productCount >= 3 && !rollerActive)
+            if (productCount >= 3 && !prodsRollerActive)
             {
-                rollerActive = true;
-                rollerTimer = 0;
+                prodsRollerActive = true;
+                prodRollerTimer = 0;
                 productCount = 0;
-                boxNeeded = false;
+                prodsBoxNeeded = false;
             }
 
-            if (rollerActive)
+            if (prodsRollerActive)
             {
-                rollerTimer++;
-                if (rollerTimer >= ROLLER_ACTIVE_TIME)
+                prodRollerTimer++;
+                if (prodRollerTimer >= ROLLER_ACTIVE_TIME)
                 {
-                    rollerActive = false;
-                    rollerTimer = 0;
+                    prodsRollerActive = false;
+                    prodRollerTimer = 0;
                 }
+            }
+
+            // 불량 종류 분석
+            bool errorEnter = factoryInputs[INPUT_ERROR_SORT_SENSOR] && !errorEnterPrev;
+            errorEnterPrev = factoryInputs[INPUT_ERROR_SORT_SENSOR];
+            if (errorEnter)
+            {
+                errorSortConvStop = true;
+                errorSortConvStopTimer = 0;
+
+                // 롤러가 동작 중이 아닐 때만 박스 요청
+                if (!errorsRollerActive)
+                {
+                    errorsBoxNeeded = true;  // 박스 필요 플래그
+                }
+            }
+
+            // Conveyor 재시작 타이머
+            if (errorSortConvStop)
+            {
+                errorSortConvStopTimer++;
+                if (errorSortConvStopTimer >= ERROR_SORT_CONV_RESTART_DELAY)
+                {
+                    errorSortConvStop = false;
+                    errorSortConvStopTimer = 0;
+                }
+            }
+
+            // 불량 컨베이어 Pusher
+            bool errorCateSensor = factoryInputs[INPUT_ERROR_CATE_SENSOR];
+            bool errorPassedSensor = !errorCateSensor && errorCateSensorPrev;  // 센서 벗어남
+
+            if (errorPassedSensor)
+            {
+                deletePCBStop = true;
+                errorPusher = true;
+                errorPusherTimer = 0;
+            }
+            errorCateSensorPrev = errorCateSensor;
+
+            // 2. Pusher 타이머 처리
+            if (errorPusher)
+            {
+                errorPusherTimer++;
+                if (errorPusherTimer >= PUSHER_ACTIVE_TIME)
+                {
+                    deletePCBStop = false;
+                    errorPusher = false;
+                    errorPusherTimer = 0;
+                }
+            }
+
+            // 3. 불량 제품 카운트
+            bool errorCounterCurrent = factoryInputs[INPUT_ERROR_COUNTER];
+
+            if (errorCounterCurrent && !errorCounterPrev)
+            {
+                errorCounterWasHigh = true;
+            }
+
+            if (!errorCounterCurrent && errorCounterPrev && errorCounterWasHigh)
+            {
+                errorCount++;
+                LogMessage($"📦 박스에 불량품 추가: {errorCount}/3");
+                errorCounterWasHigh = false;
+            }
+            errorCounterPrev = errorCounterCurrent;
+
+            // 4. 박스에 3개 담기면 롤러 가동
+            if (errorCount >= 3 && !errorsRollerActive)
+            {
+                errorsRollerActive = true;
+                errorRollerTimer = 0;
+                errorCount = 0;
+                errorsBoxNeeded = false;
+            }
+
+            if (errorsRollerActive)
+            {
+                errorRollerTimer++;
+                if (errorRollerTimer >= ERROR_ROLLER_ACTIVE_TIME)
+                {
+                    errorsRollerActive = false;
+                    errorRollerTimer = 0;
+                }
+            }
+
+            // 랙 앞에서 일시 정지
+            bool normalBoxEnter = factoryInputs[INPUT_NORAML_BOX] && !normalBoxEnterPrev;
+            normalBoxEnterPrev = factoryInputs[INPUT_NORAML_BOX];
+            if (normalBoxEnter)
+            {
+                normalBoxLoadingConv = true;
+            }
+
+            if (normalBoxLoadingConv && !stackerBusy && stackerState == 0)
+            {
+                stackerState = 1;
+                stackerTimer = 0;
+                stackerBusy = true;
+            }
+
+            // Stacker Line
+            switch (stackerState)
+            {
+                case 0:  // 대기 상태
+                    factoryCoils[COIL_STACKER_RIGHT] = false;
+                    factoryCoils[COIL_STACKER_LIFT] = false;
+                    factoryCoils[COIL_STACKER_LEFT] = false;
+                    break;
+
+                case 1:  // Step 1: 오른쪽으로 이동 (박스 들기 위함)
+                    factoryCoils[COIL_STACKER_RIGHT] = true;
+                    stackerTimer++;
+                    if (stackerTimer >= 60)
+                    {
+                        stackerState = 2;
+                        stackerTimer = 0;
+                    }
+                    break;
+
+                case 2:  // Step 2: 박스 들어올리기 (Lift)
+                    normalBoxLoadingConv = false;
+                    factoryCoils[COIL_STACKER_RIGHT] = false;
+                    factoryCoils[COIL_STACKER_LIFT] = true;
+                    stackerTimer++;
+                    if (stackerTimer >= 60)
+                    {
+                        stackerState = 3;
+                        stackerTimer = 0;
+                    }
+                    break;
+
+                case 3:  // Step 3: X축 Target Position 설정
+                    holdingRegisters[REGISTER_STACKER_TARGET_POS] = stackerTargetPosition;
+                    stackerState = 4;
+                    stackerTimer = 0;
+                    break;
+
+                case 4:  // Step 4: X축 이동 완료 대기
+                    {
+                        bool stackerMovingX = factoryInputs[INPUT_STACKER_MOVING_X];
+                        bool stackerMovingXComplete = !stackerMovingX && stackerMovingXPrev;
+                        stackerMovingXPrev = stackerMovingX;
+
+                        if (stackerMovingXComplete)
+                        {
+                            stackerState = 5;
+                            stackerTimer = 0;
+                        }
+
+                        stackerTimer++;
+                        if (stackerTimer >= 20)
+                        {
+                            stackerState = 5;
+                            stackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 5:  // Step 5: Z축 이동 완료 대기
+                    {
+                        bool stackerMovingZ = factoryInputs[INPUT_STACKER_MOVING_Z];
+                        bool stackerMovingZComplete = !stackerMovingZ && stackerMovingZPrev;
+                        stackerMovingZPrev = stackerMovingZ;
+
+                        if (stackerMovingZComplete)
+                        {
+                            stackerState = 6;
+                            stackerTimer = 0;
+                        }
+
+                        stackerTimer++;
+                        if (stackerTimer >= 20)
+                        {
+                            stackerState = 6;
+                            stackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 6:  // 물건 적재
+                    {
+                        factoryCoils[COIL_STACKER_LEFT] = true;
+                        stackerTimer++;
+                        if (stackerTimer >= 40)
+                        {
+                            stackerState = 7;
+                            stackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 7:  // 박스 내려두기
+                    factoryCoils[COIL_STACKER_LEFT] = false;  // ← LEFT 코일 끄기 추가!
+                    factoryCoils[COIL_STACKER_LIFT] = false;
+                    stackerTimer++;
+                    if (stackerTimer >= 40)
+                    {
+                        stackerState = 8;
+                        stackerTimer = 0;
+                    }
+                    break;
+
+                case 8:  // 좌표값 원위치 설정
+                    holdingRegisters[REGISTER_STACKER_TARGET_POS] = 99;
+                    stackerTimer++;
+                    if (stackerTimer >= 5)  // 약간의 대기 시간 (레지스터 값이 적용될 시간)
+                    {
+                        stackerState = 9;
+                        stackerTimer = 0;
+                    }
+                    break;
+
+                case 9:  // 원위치 이동 완료 대기
+                    {
+                        bool stackerMovingX = factoryInputs[INPUT_STACKER_MOVING_X];
+                        bool stackerMovingXComplete = !stackerMovingX && stackerMovingXPrev;
+                        stackerMovingXPrev = stackerMovingX;
+
+                        if (stackerMovingXComplete)
+                        {
+                            // 다음 적재 위치 증가
+                            stackerTargetPosition++;
+                            if (stackerTargetPosition > 10)
+                            {
+                                stackerTargetPosition = 1;
+                            }
+
+                            stackerState = 0;
+                            stackerTimer = 0;
+                            stackerBusy = false;
+                        }
+
+                        stackerTimer++;
+                        if (stackerTimer >= 60)  // 타임아웃을 길게 (원위치는 더 오래 걸릴 수 있음)
+                        {
+                            stackerTargetPosition++;
+                            if (stackerTargetPosition > 10)
+                            {
+                                stackerTargetPosition = 1;
+                            }
+                            stackerState = 0;
+                            stackerTimer = 0;
+                            stackerBusy = false;
+                        }
+                    }
+                    break;
+
+                default:
+                    stackerState = 0;
+                    break;
+            }
+
+            bool errorBoxEnter = factoryInputs[INPUT_ERROR_BOX] && !errorBoxEnterPrev;
+            errorBoxEnterPrev = factoryInputs[INPUT_ERROR_BOX];
+            if (errorBoxEnter)
+            {
+                errorBoxLoadingConv = true;
+            }
+
+            if (errorBoxLoadingConv && !errorStackerBusy && errorStackerState == 0)
+            {
+                errorStackerState = 1;
+                errorStackerTimer = 0;
+                errorStackerBusy = true;
+            }
+
+            // Stacker Line
+            switch (errorStackerState)
+            {
+                case 0:  // 대기 상태
+                    factoryCoils[COIL_ERROR_STACKER_RIGHT] = false;
+                    factoryCoils[COIL_ERROR_STACKER_LIFT] = false;
+                    factoryCoils[COIL_ERROR_STACKER_LEFT] = false;
+                    break;
+
+                case 1:  // Step 1: 오른쪽으로 이동 (박스 들기 위함)
+                    factoryCoils[COIL_ERROR_STACKER_RIGHT] = true;
+                    errorStackerTimer++;
+                    if (errorStackerTimer >= 40)
+                    {
+                        errorStackerState = 2;
+                        errorStackerTimer = 0;
+                    }
+                    break;
+
+                case 2:  // Step 2: 박스 들어올리기 (Lift)
+                    errorBoxLoadingConv = false;
+                    factoryCoils[COIL_ERROR_STACKER_RIGHT] = false;
+                    factoryCoils[COIL_ERROR_STACKER_LIFT] = true;
+                    errorStackerTimer++;
+                    if (errorStackerTimer >= 40)
+                    {
+                        errorStackerState = 3;
+                        errorStackerTimer = 0;
+                    }
+                    break;
+
+                case 3:  // Step 3: X축 Target Position 설정
+                    holdingRegisters[REGISTER_ERROR_STACKER_TARGET_POS] = errorStackerTargetPosition;
+                    errorStackerState = 4;
+                    errorStackerTimer = 0;
+                    break;
+
+                case 4:  // Step 4: X축 이동 완료 대기
+                    {
+                        bool stackerMovingX = factoryInputs[INPUT_ERROR_STACKER_MOVING_X];
+                        bool stackerMovingXComplete = !stackerMovingX && stackerMovingXPrev;
+                        stackerMovingXPrev = stackerMovingX;
+
+                        if (stackerMovingXComplete)
+                        {
+                            errorStackerState = 5;
+                            errorStackerTimer = 0;
+                        }
+
+                        errorStackerTimer++;
+                        if (errorStackerTimer >= 20)
+                        {
+                            errorStackerState = 5;
+                            errorStackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 5:  // Step 5: Z축 이동 완료 대기
+                    {
+                        bool stackerMovingZ = factoryInputs[INPUT_ERROR_STACKER_MOVING_Z];
+                        bool stackerMovingZComplete = !stackerMovingZ && stackerMovingZPrev;
+                        stackerMovingZPrev = stackerMovingZ;
+
+                        if (stackerMovingZComplete)
+                        {
+                            errorStackerState = 6;
+                            errorStackerTimer = 0;
+                        }
+
+                        errorStackerTimer++;
+                        if (errorStackerTimer >= 20)
+                        {
+                            errorStackerState = 6;
+                            errorStackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 6:  // 물건 적재
+                    {
+                        factoryCoils[COIL_ERROR_STACKER_LEFT] = true;
+                        errorStackerTimer++;
+                        if (errorStackerTimer >= 40)
+                        {
+                            errorStackerState = 7;
+                            errorStackerTimer = 0;
+                        }
+                    }
+                    break;
+
+                case 7:  // 박스 내려두기
+                    factoryCoils[COIL_ERROR_STACKER_LEFT] = false;  // ← LEFT 코일 끄기 추가!
+                    factoryCoils[COIL_ERROR_STACKER_LIFT] = false;
+                    errorStackerTimer++;
+                    if (errorStackerTimer >= 40)
+                    {
+                        errorStackerState = 8;
+                        errorStackerTimer = 0;
+                    }
+                    break;
+
+                case 8:  // 좌표값 원위치 설정
+                    holdingRegisters[REGISTER_ERROR_STACKER_TARGET_POS] = 99;
+                    errorStackerTimer++;
+                    if (errorStackerTimer >= 5)  // 약간의 대기 시간 (레지스터 값이 적용될 시간)
+                    {
+                        errorStackerState = 9;
+                        errorStackerTimer = 0;
+                    }
+                    break;
+
+                case 9:  // 원위치 이동 완료 대기
+                    {
+                        bool stackerMovingX = factoryInputs[INPUT_ERROR_STACKER_MOVING_X];
+                        bool stackerMovingXComplete = !stackerMovingX && stackerMovingXPrev;
+                        stackerMovingXPrev = stackerMovingX;
+
+                        if (stackerMovingXComplete)
+                        {
+                            // 다음 적재 위치 증가
+                            errorStackerTargetPosition++;
+                            if (errorStackerTargetPosition > 10)
+                            {
+                                errorStackerTargetPosition = 1;
+                            }
+
+                            errorStackerState = 0;
+                            errorStackerTimer = 0;
+                            errorStackerBusy = false;
+                        }
+
+                        errorStackerTimer++;
+                        if (errorStackerTimer >= 60)  // 타임아웃을 길게 (원위치는 더 오래 걸릴 수 있음)
+                        {
+                            errorStackerTargetPosition++;
+                            if (errorStackerTargetPosition > 10)
+                            {
+                                errorStackerTargetPosition = 1;
+                            }
+                            errorStackerState = 0;
+                            errorStackerTimer = 0;
+                            errorStackerBusy = false;
+                        }
+                    }
+                    break;
+
+                default:
+                    errorStackerState = 0;
+                    break;
             }
 
             // Outputs
@@ -815,8 +1284,10 @@ namespace FactoryIOControl
             factoryCoils[COIL_MOVE_Z] = moveZActive;
             factoryCoils[COIL_MOVE_X] = moveXActive;
             factoryCoils[COIL_BASES_RIGHT_POSITIONER] = basesRightPositionerActive;
-            factoryCoils[COIL_BOX_EMITTER] = boxNeeded && !rollerActive;
+            factoryCoils[COIL_BOX_EMITTER] = prodsBoxNeeded && !prodsRollerActive;
+            factoryCoils[COIL_ERROR_BOX_EMITTER] = errorsBoxNeeded && !errorsRollerActive;
             factoryCoils[COIL_NORMAL_PUSHER] = productsPusher;
+            factoryCoils[COIL_ERROR_PUSHER] = errorPusher;
 
             // Exit Conveyors: 무조건 동작
             factoryCoils[COIL_LIDS_EXIT_CONV1] = true;
@@ -825,11 +1296,15 @@ namespace FactoryIOControl
             factoryCoils[COIL_CURVED_EXIT_L] = true;
             factoryCoils[COIL_CURVED_EXIT_L2] = true;
             factoryCoils[COIL_CONV_WITH_SENSOR] = !convWithSensorStop;
-            factoryCoils[COIL_NORMAL_ROLLER] = rollerActive;
-            factoryCoils[COIL_LOADING_NORAML] = true;
+            factoryCoils[COIL_NORMAL_ROLLER] = prodsRollerActive;
+            factoryCoils[COIL_ERROR_ROLLER] = errorsRollerActive;
+            factoryCoils[COIL_LOADING_NORAML] = !normalBoxLoadingConv;
+            factoryCoils[COIL_LOADING_ERROR] = !errorBoxLoadingConv;
             factoryCoils[COIL_CURVED_CONVC] = true;
             factoryCoils[COIL_SORT_CONVC] = true;
             factoryCoils[COIL_NORMAL_SORT] = !normalSortStop;
+            factoryCoils[COIL_SORT_CONVC] = !errorSortConvStop;
+            factoryCoils[COIL_DEL_PCB] = !deletePCBStop;
         }
 
         private void ResetAllOutputs()
@@ -866,6 +1341,7 @@ namespace FactoryIOControl
             stateTimer = 0;
             convWithSensorStop = false;
             productsPusher = false;
+            errorPusher = false;
             rollerstop = false;
             productCount = 0;
             prodCounterPrev = false;
@@ -877,14 +1353,29 @@ namespace FactoryIOControl
             normalSortStop = false;
             productsPusher = false;
             pusherTimer = 0;
+            errorPusherTimer = 0;
             prodCounterPrev = false;
             prodCounterWasHigh = false;
             productCount = 0;
-            rollerActive = false;
-            rollerTimer = 0;
-            boxNeeded = false;
+            prodsRollerActive = false;
+            errorsRollerActive = false;
+            prodRollerTimer = 0;
+            errorRollerTimer = 0;
+            prodsBoxNeeded = false;
+            errorsBoxNeeded = false;
             convWithSensorStop = false;
+            errorSortConvStop = false;
+            deletePCBStop = false;
             convWithSensorStopTimer = 0;
+
+            normalBoxLoadingConv = false;
+            errorBoxLoadingConv = false;
+            stackerState = 0;
+            stackerTimer = 0;
+            stackerBusy = false;
+            errorStackerState = 0;
+            errorStackerTimer = 0;
+            errorStackerBusy = false;
         }
 
         private void LogMessage(string message)

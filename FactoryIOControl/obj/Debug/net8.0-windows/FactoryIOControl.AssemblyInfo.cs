@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FactoryIOControl")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e3a76aeade10288c720f86fbd0af1b595000ee2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac3e65f1c124ec862184ef33741aa4cb0fc2b2bf")]
 [assembly: System.Reflection.AssemblyProductAttribute("FactoryIOControl")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FactoryIOControl")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
