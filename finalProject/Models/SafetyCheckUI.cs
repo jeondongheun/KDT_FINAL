@@ -74,6 +74,9 @@ namespace finalProject.Models
 
         public static void UpdateWorkersInfo(bool hasHelmet, bool hasVest, bool hasGloves, Worker worker)
         {
+            Debug.WriteLine($"Worker: {worker?.Name ?? "null"}");
+            Debug.WriteLine($"WorkersWin: {WorkersWin != null}");
+
             WorkersWin?.Dispatcher.BeginInvoke(() =>
             {
                 var currentTime = DateTime.Now;
@@ -97,20 +100,30 @@ namespace finalProject.Models
                         WorkersWin.txtAssignedLine.Text = worker.AssignedLine + " 라인";
 
                     // 프로필 이미지
-                    if (worker != null && !string.IsNullOrEmpty(worker.ProfileImagePath))
+                    if (!string.IsNullOrEmpty(worker.ProfileImagePath))
                     {
                         try
                         {
-                            // Debug 폴더 내 이미지 경로
                             string imagePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, worker.ProfileImagePath);
+
+                            Debug.WriteLine($"이미지 경로: {imagePath}");
+                            Debug.WriteLine($"파일 존재: {File.Exists(imagePath)}");
 
                             if (File.Exists(imagePath))
                             {
-                                WorkersWin.imgProfile.Source = new BitmapImage(new Uri(imagePath, UriKind.Absolute));
+                                BitmapImage bitmap = new BitmapImage();
+                                bitmap.BeginInit();
+                                bitmap.UriSource = new Uri(imagePath, UriKind.Absolute);
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.EndInit();
+
+                                WorkersWin.imgProfile.Source = bitmap;
+                                Debug.WriteLine("프로필 이미지 로드 성공");
                             }
                             else
                             {
                                 Debug.WriteLine($"프로필 이미지를 찾을 수 없습니다: {imagePath}");
+                                Debug.WriteLine($"현재 디렉토리: {AppDomain.CurrentDomain.BaseDirectory}");
                             }
                         }
                         catch (Exception ex)
@@ -118,12 +131,12 @@ namespace finalProject.Models
                             Debug.WriteLine($"프로필 이미지 로드 오류: {ex.Message}");
                         }
                     }
-                }
-                else
-                {
-                    // 인식 실패 시
-                    if (WorkersWin.txtWorkerName != null)
-                        WorkersWin.txtWorkerName.Text = "인식 실패";
+                    else
+                    {
+                        // 인식 실패 시
+                        if (WorkersWin.txtWorkerName != null)
+                            WorkersWin.txtWorkerName.Text = "인식 실패";
+                    }
                 }
 
                 // 헬멧 상태
@@ -155,16 +168,23 @@ namespace finalProject.Models
                     if (missingItems.Count == 0)
                     {
                         WorkersWin.txtAlert.Text = "모든 안전 장비 착용 완료";
+                        WorkersWin.txtAlert.Foreground = new SolidColorBrush(Colors.Green);
                     }
                     else
                     {
                         WorkersWin.txtAlert.Text = $"안전 장비 착용 후 입장해 주세요.";
+                        WorkersWin.txtAlert.Foreground = new SolidColorBrush(Colors.Red);
                     }
+
+                    Debug.WriteLine($"txtAlert 업데이트: {WorkersWin.txtAlert.Text}");
+                }
+                else
+                {
+                    Debug.WriteLine("txtAlert가 null입니다!");
                 }
 
                 // 근무 시간 판별
                 int hour = currentTime.Hour;
-
                 if (hour >= 6 && hour < 14)
                     WorkersWin.workTime.Text = "오전";
                 else if (hour >= 14 && hour < 22)

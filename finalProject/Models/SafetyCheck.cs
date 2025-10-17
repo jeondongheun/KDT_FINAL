@@ -247,7 +247,7 @@ namespace finalProject.Models
             }
 
             // 헬멧 착용 시 MainWindow → WorkersInfo로 페이지 전환
-            if (!entryViolation)
+            if (entryViolation)
             {
                 // MainWindow 카메라 정지
                 isProcessingActive = false;
@@ -296,6 +296,10 @@ namespace finalProject.Models
 
                         // WorkersWin이 null인 경우 초기화
                         if (WorkersWin == null) WorkersWin = new WorkersInfo();
+
+                        SafetyCheckUI.WorkersWin = WorkersWin;
+                        Debug.WriteLine($"WorkersWin 초기화 완료: {WorkersWin != null}");
+                        Debug.WriteLine($"SafetyCheckUI.WorkersWin 설정 완료: {SafetyCheckUI.WorkersWin != null}");
 
                         // MainWindow 숨기기
                         MainWin.Hide();
