@@ -118,7 +118,7 @@
 
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
             <Border Height="70" Background="#00538F" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
-                <Button Content="작업 시작" Foreground="White" BorderBrush="Transparent" Background="Transparent" VerticalAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                <Button x:Name="btnStartWork" Content="작업 시작" Foreground="White" BorderBrush="Transparent" Background="Transparent" VerticalAlignment="Center" FontSize="17" FontWeight="SemiBold" Click="btnStartWork_Click"/>
             </Border>
         </StackPanel>
     </Grid>

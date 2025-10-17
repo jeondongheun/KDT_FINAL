@@ -38,22 +38,35 @@ namespace finalProject.Views
             this.Closing += WorkersInfo_Closing;
         }
 
+
+        private void btnStartWork_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. FactoryIOControl 창의 새 인스턴스를 생성합니다.
+            FactoryIOControl factoryWindow = new FactoryIOControl();
+
+            // 2. 새로 만든 창을 화면에 보여줍니다.
+            factoryWindow.Topmost = true;
+            factoryWindow.Show();
+
+            // 3. 현재 창(WorkersInfo)을 닫습니다.
+            this.Close();
+        }
+
         private void WorkersInfo_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             try
             {
-                // SafetyCheck 리소스 정리
+                // SafetyCheck 리소스 정리는 유지합니다.
                 SafetyCheck.Cleanup();
 
-                // 애플리케이션 완전 종료
-                Application.Current.Shutdown();
-                Debug.WriteLine("프로그램 종료");
+                // 아래 줄을 주석 처리하거나 삭제하세요.
+                // Application.Current.Shutdown(); 
+
+                Debug.WriteLine("WorkersInfo 창이 닫혔습니다.");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"WorkersInfo 종료 중 오류: {ex.Message}");
-                // 오류가 있어도 강제 종료
-                Application.Current.Shutdown();
             }
         }
     }
