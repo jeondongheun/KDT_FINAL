@@ -88,6 +88,8 @@
         public const int COIL_ERROR_LIGHT = 55;
         public const int COIL_NORMAL_LIGHT = 56;
         public const int COIL_DEFECTED_LIGHT = 57;
+        public const int COIL_DISPOSED_LIGTH = 58;
+        public const int COIL_REPROCESSING = 59;
 
         // Pushers
         public const int COIL_NORMAL_PUSHER = 31;

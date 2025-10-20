@@ -5,6 +5,9 @@
     <Compile Update="Views\FactoryIOControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\ResultDashboard.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\WorkersInfo.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

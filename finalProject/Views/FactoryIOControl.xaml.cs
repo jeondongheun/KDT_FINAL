@@ -25,6 +25,7 @@ namespace finalProject.Views
         private Thread serverThread;
         private bool isRunning = false;
         private bool isServerRunning = false;
+        private bool _isClosing = false;
 
         // 로직 클래스 인스턴스
         private BasesLidsLogic basesLidsLogic;
@@ -82,11 +83,14 @@ namespace finalProject.Views
         private readonly CameraManager _cameraManager;
         private readonly ImageProcessor _imageProcessor;
         private readonly VisionProcessor _visionProcessor;
+        private readonly ROIProcessor _roiProcessor;
         private readonly string _savePath = @"C:\Users\user\Desktop\PCB";
         private Bitmap _currentFrame;
         private readonly object _frameLock = new object();
         private bool isInspecting = false;
         private bool lastInspectionResult = true;
+        private bool isClassifying = false;
+        private bool shouldPushError = false;
 
         public FactoryIOControl()
         {
@@ -103,6 +107,11 @@ namespace finalProject.Views
             // 비전 시스템 초기화 로직
             _cameraManager = new CameraManager();
             _imageProcessor = new ImageProcessor();
+            _roiProcessor = new ROIProcessor(_savePath, "pcb_best.onnx");
+
+            // ROI Processor 로그 이벤트 연결
+            _roiProcessor.LogMessageRequested += LogMessage;
+            _roiProcessor.BinarizedImageUpdated += UpdateBinarizedImage;
 
             // ONNX 모델 파일 경로 지정
             _visionProcessor = new VisionProcessor("pcb_best.onnx");
@@ -112,15 +121,35 @@ namespace finalProject.Views
 
             // 카메라 시작 및 이벤트 핸들러 연결
             _cameraManager.NewFrame += CameraManager_NewFrame;
-            if (!_cameraManager.StartCamera())
+
+            this.Closing += FactoryIOControl_Closing;
+        }
+
+        public void StartFactoryIOSystem()
+        {
+            if (!isRunning && connectedClient != null && connectedClient.Connected)
             {
-                LogMessage("사용 가능한 카메라를 찾을 수 없습니다.");
-                MessageBox.Show("카메라를 찾을 수 없습니다!", "카메라 오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                isRunning = true;
+                plcTimer.Start();
+
+                // 카메라도 함께 시작
+                if (!_cameraManager.StartCamera())
+                {
+                    LogMessage("사용 가능한 카메라를 찾을 수 없습니다.");
+                    MessageBox.Show("카메라를 찾을 수 없습니다!", "카메라 오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    LogMessage("카메라 시작됨.");
+                }
+
+                LogMessage("▶ 시스템 시작 - PLC 스캔 시작");
             }
-            else
-            {
-                LogMessage("카메라 시작됨.");
-            }
+        }
+
+        public bool IsConnected()
+        {
+            return connectedClient != null && connectedClient.Connected;
         }
 
         // 새 메서드 및 이벤트 핸들러 추가
@@ -129,121 +158,69 @@ namespace finalProject.Views
         /// </summary>
         private void CameraManager_NewFrame(Bitmap frame)
         {
-            lock (_frameLock)
+            if (_isClosing) return;
+
+            try
             {
-                _currentFrame?.Dispose();
-                _currentFrame = (Bitmap)frame.Clone();
+                lock (_frameLock)
+                {
+                    _currentFrame?.Dispose();
+                    _currentFrame = (Bitmap)frame.Clone();
+                }
+
+                // UI 스레드에서 이미지를 업데이트
+                if (!_isClosing) // ⭐ 다시 확인
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (_isClosing) return;
+
+                        try
+                        {
+                            CameraFeed.Source = ROIProcessor.BitmapToBitmapSource(frame);
+                        }
+                        catch { }
+                    }));
+                }
             }
-
-            // UI 스레드에서 이미지를 업데이트합니다.
-            Dispatcher.Invoke(() =>
+            catch (Exception ex)
             {
-                CameraFeed.Source = BitmapToBitmapSource(frame);
-            });
-        }
-
-        /// <summary>
-        /// 키보드 키를 누를 때 호출됩니다.
-        /// </summary>
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Space)
-            {
-                LogMessage("스페이스바 감지. ROI 캡처 및 분석을 시작합니다.");
-                // CaptureAndProcessROI();
+                Console.WriteLine($"프레임 처리 오류: {ex.Message}");
             }
         }
 
         /// <summary>
         /// ROI 영역을 캡처하고 전체 이미지 처리 파이프라인을 실행합니다.
         /// </summary>
-        private void CaptureAndProcessROI()
+        private void CaptureAndProcessROI_Sensor1()
         {
-            Bitmap roiBitmap;
+            Bitmap currentFrame;
             lock (_frameLock)
             {
-                if (_currentFrame == null)
-                {
-                    LogMessage("캡처할 카메라 프레임이 없습니다.");
-                    return;
-                }
-
-                // ROI 영역 계산 (카메라 중앙 320x320)
-                int roiSize = 320;
-                int x = (_currentFrame.Width - roiSize) / 2;
-                int y = (_currentFrame.Height - roiSize) / 2;
-                var roiRect = new System.Drawing.Rectangle(x, y, roiSize, roiSize);
-
-                // ROI 영역만 잘라내기
-                roiBitmap = _currentFrame.Clone(roiRect, _currentFrame.PixelFormat);
+                currentFrame = _currentFrame != null ? (Bitmap)_currentFrame.Clone() : null;
             }
 
-            // 원본 캡처 이미지 저장
-            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmssfff");
-            string originalFileName = $"{timestamp}.png";
-            string originalFilePath = Path.Combine(_savePath, originalFileName);
-            roiBitmap.Save(originalFilePath, ImageFormat.Png);
-            LogMessage($"원본 이미지 저장: {originalFilePath}");
-
-            // 이미지 전처리 (ImageProcessor 사용)
-            Bitmap binarizedBitmap = _imageProcessor.ProcessForPrediction(roiBitmap);
-
-            // 이진화된 이미지 저장
-            string binaryFileName = $"{timestamp}_binary.png";
-            string binaryFilePath = Path.Combine(_savePath, binaryFileName);
-            binarizedBitmap.Save(binaryFilePath, ImageFormat.Png);
-            LogMessage($"이진화 이미지 저장: {binaryFilePath}");
-
-            // 이진화된 이미지 UI에 표시
-            Dispatcher.Invoke(() =>
+            if (currentFrame != null)
             {
-                BinarizedImageFeed.Source = BitmapToBitmapSource(binarizedBitmap);
-            });
-
-            // 불량 탐지 (VisionProcessor 사용)
-            (var detections, _) = _visionProcessor.Predict(roiBitmap);  // 원본 ROI 이미지를 전달
-
-            // 결과 로그 출력
-            if (detections == null || detections.Count == 0)
-            {
-                lastInspectionResult = true; // 정상
-                LogMessage("👉 결과: 정상 제품입니다.");
+                _roiProcessor.ProcessROI_Sensor1(currentFrame);
+                lastInspectionResult = _roiProcessor.LastInspectionResult;
+                currentFrame.Dispose();
             }
-            else
-            {
-                lastInspectionResult = false;
-                LogMessage($"👉 결과: 불량 탐지! (총 {detections.Count}개)");
-
-                var defectCounts = detections.GroupBy(d => d.Label)
-                                             .ToDictionary(g => g.Key, g => g.Count());
-
-                foreach (var defect in defectCounts)
-                {
-                    LogMessage($"   - {defect.Key}: {defect.Value}개");
-                }
-            }
-
-            // 사용된 비트맵 객체 메모리 해제
-            roiBitmap.Dispose();
-            binarizedBitmap.Dispose();
         }
 
-        /// <summary>
-        /// System.Drawing.Bitmap을 WPF에서 사용할 수 있는 BitmapSource로 변환합니다.
-        /// </summary>
-        private BitmapSource BitmapToBitmapSource(Bitmap bitmap)
+        private void CaptureAndProcessROI_Sensor2()
         {
-            using (var memory = new MemoryStream())
+            Bitmap currentFrame;
+            lock (_frameLock)
             {
-                bitmap.Save(memory, ImageFormat.Bmp);
-                memory.Position = 0;
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();   // UI 스레드 간 충돌 방지
-                return bitmapImage;
+                currentFrame = _currentFrame != null ? (Bitmap)_currentFrame.Clone() : null;
+            }
+
+            if (currentFrame != null)
+            {
+                _roiProcessor.ProcessROI_Sensor2(currentFrame);
+                lastInspectionResult = _roiProcessor.LastInspectionResult;
+                currentFrame.Dispose();
             }
         }
 
@@ -500,36 +477,6 @@ namespace finalProject.Views
             plcTimer.Tick += PlcScanCycle;
         }
 
-        private void BtnStart_Click(object sender, RoutedEventArgs e)
-        {
-            if (!isRunning && connectedClient != null && connectedClient.Connected)
-            {
-                isRunning = true;
-                plcTimer.Start();
-                LogMessage("▶ 시스템 시작 - PLC 스캔 시작");
-                BtnStart.IsEnabled = false;
-                BtnStop.IsEnabled = true;
-            }
-            else if (connectedClient == null || !connectedClient.Connected)
-            {
-                MessageBox.Show("Factory IO가 연결되어 있지 않습니다!",
-                    "연결 필요", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private void BtnStop_Click(object sender, RoutedEventArgs e)
-        {
-            if (isRunning)
-            {
-                isRunning = false;
-                plcTimer.Stop();
-                ResetAllOutputs();
-                LogMessage("⏸ 시스템 정지");
-                BtnStart.IsEnabled = true;
-                BtnStop.IsEnabled = false;
-            }
-        }
-
         private void PlcScanCycle(object sender, EventArgs e)
         {
             try
@@ -605,7 +552,7 @@ namespace finalProject.Views
 
                 Task.Run(() =>
                 {
-                    CaptureAndProcessROI();
+                    CaptureAndProcessROI_Sensor1();
                     convWithSensorStop = false;
                     isInspecting = false;
                 });
@@ -642,7 +589,7 @@ namespace finalProject.Views
             bool normalSensor = factoryInputs[FactoryAddresses.INPUT_NORMAL_SENSOR];
             bool productPassedSensor = !normalSensor && normalSensorPrev;
 
-            if (productPassedSensor)
+            if (productPassedSensor && lastInspectionResult)
             {
                 normalSortStop = true;
                 productsPusher = true;
@@ -725,33 +672,48 @@ namespace finalProject.Views
             {
                 errorSortConvStop = true;
                 errorSortConvStopTimer = 0;
+                isClassifying = true;
 
                 if (!errorsRollerActive)
                 {
                     errorsBoxNeeded = true;
                 }
+
+                Task.Run(() =>
+                {
+                    CaptureAndProcessROI_Sensor2();
+                    shouldPushError = !_roiProcessor.LastDetectedDefects.Contains("pin-hole");
+                    errorSortConvStop = false;
+                    isClassifying = false;
+                });
             }
 
-            // Conveyor 재시작 타이머
-            if (errorSortConvStop)
+            if (factoryInputs[FactoryAddresses.INPUT_ERROR_SORT_SENSOR])
             {
-                errorSortConvStopTimer++;
-                if (errorSortConvStopTimer >= ERROR_SORT_CONV_RESTART_DELAY)
-                {
-                    errorSortConvStop = false;
-                    errorSortConvStopTimer = 0;
-                }
+                // 센서에 제품이 있을 때만 조명 제어
+                bool yellowLight = !isClassifying && shouldPushError;
+                bool redLight = !isInspecting && !shouldPushError;
+
+                factoryCoils[FactoryAddresses.COIL_REPROCESSING] = yellowLight;
+                factoryCoils[FactoryAddresses.COIL_DISPOSED_LIGTH] = redLight;
+            }
+            else
+            {
+                // 센서에 제품이 없으면 모든 조명 OFF
+                factoryCoils[FactoryAddresses.COIL_REPROCESSING] = false;
+                factoryCoils[FactoryAddresses.COIL_DISPOSED_LIGTH] = false;
             }
 
             // 2. 불량 컨베이어 Pusher
             bool errorCateSensor = factoryInputs[FactoryAddresses.INPUT_ERROR_CATE_SENSOR];
             bool errorPassedSensor = !errorCateSensor && errorCateSensorPrev;
 
-            if (errorPassedSensor)
+            if (errorPassedSensor && shouldPushError)
             {
                 deletePCBStop = true;
                 errorPusher = true;
                 errorPusherTimer = 0;
+                shouldPushError = false;
             }
             errorCateSensorPrev = errorCateSensor;
 
@@ -849,38 +811,172 @@ namespace finalProject.Views
             lastInspectionResult = true;
         }
 
+        // 분석 결과 로그 메세지 연동
         private void LogMessage(string message)
         {
             Dispatcher.Invoke(() =>
             {
-                TxtLog.AppendText($"[{DateTime.Now:HH:mm:ss.fff}] {message}\n");
-                TxtLog.ScrollToEnd();
+                string timeStamp = DateTime.Now.ToString("HH:mm:ss.fff");
+                TxtLog.Items.Add($"[{timeStamp}] {message}");
+
+                // 자동 스크롤 (최신 로그로)
+                if (TxtLog.Items.Count > 0)
+                {
+                    TxtLog.ScrollIntoView(TxtLog.Items[TxtLog.Items.Count - 1]);
+                }
             });
+        }
+
+        // 이진화 이미지 연동
+        private void UpdateBinarizedImage(BitmapSource binarizedImage)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                BinarizedImageFeed.Source = binarizedImage;
+            });
+        }
+
+        public void ShowWindow()
+        {
+            this.Show();
+            this.Activate();
+        }
+
+        public void HideWindow()
+        {
+            this.Hide();
+        }
+
+        private void FactoryIOControl_Closing(object sender, CancelEventArgs e)
+        {
+            Console.WriteLine("=== FactoryIOControl 종료 시작 ===");
+            _isClosing = true;
+
+            try
+            {
+                // 1. PLC 타이머 정지
+                isRunning = false;
+                plcTimer?.Stop();
+                Console.WriteLine("PLC 타이머 정지 완료");
+
+                // 2. 출력 리셋
+                ResetAllOutputs();
+                Console.WriteLine("출력 리셋 완료");
+
+                // 3. 카메라 정지 ⭐
+                StopCameraResources();
+
+                // 4. 네트워크 스트림 정리
+                isServerRunning = false;
+
+                try
+                {
+                    stream?.Close();
+                    stream?.Dispose();
+                    stream = null;
+                    Console.WriteLine("Stream 정리 완료");
+                }
+                catch { }
+
+                try
+                {
+                    connectedClient?.Close();
+                    connectedClient = null;
+                    Console.WriteLine("Client 정리 완료");
+                }
+                catch { }
+
+                try
+                {
+                    modbusServer?.Stop();
+                    modbusServer = null;
+                    Console.WriteLine("Modbus 서버 정지 완료");
+                }
+                catch { }
+
+                // 5. 서버 스레드 종료 대기
+                if (serverThread != null && serverThread.IsAlive)
+                {
+                    serverThread.Join(1000); // 최대 1초 대기
+                    Console.WriteLine("서버 스레드 종료 완료");
+                }
+
+                // 6. 약간의 대기 시간
+                System.Threading.Thread.Sleep(300);
+
+                Console.WriteLine("=== FactoryIOControl 종료 완료 ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"종료 중 오류: {ex.Message}");
+            }
+        }
+
+        // ⭐ 카메라 리소스 정리 메서드 (강화)
+        private void StopCameraResources()
+        {
+            Console.WriteLine("=== 카메라 리소스 정리 시작 ===");
+
+            try
+            {
+                // 1. 이벤트 핸들러 제거 (중요!)
+                if (_cameraManager != null)
+                {
+                    _cameraManager.NewFrame -= CameraManager_NewFrame;
+                    Console.WriteLine("카메라 이벤트 해제 완료");
+                }
+
+                // 2. 카메라 정지
+                if (_cameraManager != null && _cameraManager.IsRunning)
+                {
+                    _cameraManager.StopCamera();
+                    Console.WriteLine("카메라 정지 완료");
+                }
+
+                // 3. 현재 프레임 정리
+                lock (_frameLock)
+                {
+                    _currentFrame?.Dispose();
+                    _currentFrame = null;
+                    Console.WriteLine("현재 프레임 정리 완료");
+                }
+
+                // 4. Vision Processor 정리 (IDisposable이면)
+                try
+                {
+                    (_visionProcessor as IDisposable)?.Dispose();
+                    Console.WriteLine("Vision Processor 정리 완료");
+                }
+                catch { }
+
+                // 5. 약간의 대기 (카메라 완전 해제)
+                System.Threading.Thread.Sleep(200);
+
+                Console.WriteLine("=== 카메라 리소스 정리 완료 ===");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"카메라 정리 오류: {ex.Message}");
+            }
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            isServerRunning = false;
-            isRunning = false;
-            plcTimer?.Stop();
-            ResetAllOutputs();
-            stream?.Close();
-            connectedClient?.Close();
-            modbusServer?.Stop();
-            _cameraManager?.StopCamera();
-            _currentFrame?.Dispose();
+            Console.WriteLine("=== OnClosed 호출 ===");
+            _isClosing = true;
+
+            // 혹시 Closing에서 정리 안 된 것들 재정리
+            try
+            {
+                StopCameraResources();
+            }
+            catch { }
+
             base.OnClosed(e);
+
+            // ⭐ 강제 종료 (최후의 수단)
+            System.Threading.Thread.Sleep(300);
+            Console.WriteLine("=== OnClosed 완료 ===");
         }
-
-        //protected override void OnClosing(CancelEventArgs e)
-        //{
-        //    base.OnClosing(e);
-
-        //    // WPF 창이 닫히기 전에 카메라 정지
-        //    if (_cameraManager.IsRunning)
-        //    {
-        //        _cameraManager.StopCamera();
-        //    }
-        //}
     }
 }

@@ -7,25 +7,9 @@
         xmlns:mui="clr-namespace:ModernWpf.Controls;assembly=ModernWpf.Controls"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="Workers Information" Height="960" Width="1280" Background="#F3F4F6"
+        Title="Workers Information" Height="960" Width="1280" Background="#1E1E1E"
         WindowStartupLocation="CenterScreen">
 
-    <!-- 경고등 깜박임 -->
-    <Window.Resources>
-        <Storyboard x:Key="SirenBlink" RepeatBehavior="Forever" AutoReverse="True">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                             From="1.0" To="0.1" Duration="0:0:0.5"/>
-        </Storyboard>
-
-        <Style x:Key="SirenBlinkStyle" TargetType="TextBlock">
-            <Style.Triggers>
-                <EventTrigger RoutedEvent="Loaded">
-                    <BeginStoryboard Storyboard="{StaticResource SirenBlink}"/>
-                </EventTrigger>
-            </Style.Triggers>
-        </Style>
-    </Window.Resources>
-    
     <Grid x:Name="WorkersGrid" Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="350"/>
@@ -42,8 +26,8 @@
             <Border CornerRadius="10" Width="200" Height="250">
                 <Image x:Name="imgProfile" Stretch="UniformToFill"/>
             </Border>
-            <TextBlock x:Name="txtWorkerName" Margin="10" TextAlignment="Center" FontSize="20"/>
-            <TextBlock x:Name="txtDepartment" Margin="3" TextAlignment="Center" FontSize="16"/>
+            <TextBlock x:Name="txtWorkerName" Margin="10" TextAlignment="Center" FontSize="20" FontWeight="SemiBold" Foreground="White"/>
+            <TextBlock x:Name="txtDepartment" Margin="3" TextAlignment="Center" FontSize="16" Foreground="White"/>
         </StackPanel>
 
         <UniformGrid Grid.Row="0" Grid.Column="1" Rows="4" Margin="10 0 0 15">
@@ -76,14 +60,14 @@
             </Border>
         </UniformGrid>
 
-        <GroupBox Header="  안전 장비 착용 상태  " Grid.Row="1" Grid.ColumnSpan="2" FontSize="20" FontWeight="SemiBold" Margin="15" BorderBrush="Gray" BorderThickness="1">
+        <GroupBox Header="  안전 장비 착용 상태  " Grid.Row="1" Grid.ColumnSpan="2" FontSize="20" FontWeight="SemiBold" Margin="15" Foreground="White" BorderBrush="Gray" BorderThickness="1">
             <UniformGrid Rows="4" Margin="5">
                 <Border x:Name="borderH" Height="70" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <mui:ProgressRing x:Name="progHelmet" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkH" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
                         <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnH" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
-                        <TextBlock x:Name="helmets" Text="안전모" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="helmets" Text="안전모" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold" Foreground="Black"/>
                     </StackPanel>
                 </Border>
 
@@ -92,7 +76,7 @@
                         <mui:ProgressRing x:Name="progVest" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkV" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
                         <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnV" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
-                        <TextBlock x:Name="vest" Text="안전 조끼" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="vest" Text="안전 조끼" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold" Foreground="Black"/>
                     </StackPanel>
                 </Border>
 
@@ -101,15 +85,15 @@
                         <mui:ProgressRing x:Name="progGloves" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
                         <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnG" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
-                        <TextBlock x:Name="gloves" Text="안전 장갑" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="gloves" Text="안전 장갑" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold" Foreground="Black"/>
                     </StackPanel>
                 </Border>
 
                 <Border>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock x:Name="sirenF" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Style="{StaticResource SirenBlinkStyle}"/>
+                        <TextBlock x:Name="sirenF" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
                         <TextBlock x:Name="txtAlert" TextAlignment="Center" VerticalAlignment="Center" Margin="10"/>
-                        <TextBlock x:Name="sirenB" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Style="{StaticResource SirenBlinkStyle}"/>
+                        <TextBlock x:Name="sirenB" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>

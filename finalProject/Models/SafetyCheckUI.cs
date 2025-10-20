@@ -142,18 +142,21 @@ namespace finalProject.Models
                 // 헬멧 상태
                 WorkersWin.progHelmet?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
                 WorkersWin.borderH?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasHelmet ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.helmets?.SetCurrentValue(TextBlock.TextProperty, hasHelmet ? "안전모 착용" : "안전모 미착용");
                 WorkersWin.checkH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Visible : Visibility.Collapsed);
                 WorkersWin.warnH?.SetCurrentValue(UIElement.VisibilityProperty, hasHelmet ? Visibility.Collapsed : Visibility.Visible);
 
                 // 조끼 상태
                 WorkersWin.progVest?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
                 WorkersWin.borderV?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasVest ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.vest?.SetCurrentValue(TextBlock.TextProperty, hasVest ? "안전 조끼 착용" : "안전 조끼 미착용");
                 WorkersWin.checkV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Visible : Visibility.Collapsed);
                 WorkersWin.warnV?.SetCurrentValue(UIElement.VisibilityProperty, hasVest ? Visibility.Collapsed : Visibility.Visible);
 
                 // 장갑 상태
                 WorkersWin.progGloves?.SetCurrentValue(UIElement.VisibilityProperty, Visibility.Collapsed);
                 WorkersWin.borderG?.SetCurrentValue(Border.BackgroundProperty, new SolidColorBrush(hasGloves ? Color.FromRgb(240, 253, 244) : Color.FromRgb(254, 252, 232)));
+                WorkersWin.gloves?.SetCurrentValue(TextBlock.TextProperty, hasGloves ? "안전 장갑 착용" : "안전 장갑 미착용");
                 WorkersWin.checkG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Visible : Visibility.Collapsed);
                 WorkersWin.warnG?.SetCurrentValue(UIElement.VisibilityProperty, hasGloves ? Visibility.Collapsed : Visibility.Visible);
 

@@ -7,7 +7,7 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:local="clr-namespace:finalProject"
         mc:Ignorable="d"
-        Title="Safety Check" Height="960" Width="1280" Background="#F3F4F6"
+        Title="Safety Check" Height="960" Width="1280" Background="#1E1E1E"
         WindowStartupLocation="CenterScreen">
 
     <Grid x:Name="MainGrid" Margin="10">

@@ -5,84 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:finalProject.Views"
         mc:Ignorable="d"
-        Title="Factory IO Vision Controller" Height="600" Width="1000" Background="#1E1E1E"
-        WindowStartupLocation="Manual" Top="0" Left="0"
-        KeyDown="Window_KeyDown">
+        Title="Factory IO Vision Controller" Height="400" Width="650" Background="#1E1E1E"
+        WindowStartupLocation="Manual" Top="0" Left="0">
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                   Text="Factory IO Control &amp; Vision System" 
-                   FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,0,0,20"/>
-
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button x:Name="BtnStart" Content="▶ 시작" Width="120" Height="50" FontSize="16" FontWeight="Bold" Background="#4CAF50" Foreground="White" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" Click="BtnStart_Click">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="5">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#45A049"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#666666"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button x:Name="BtnStop" Content="⏸ 정지" Width="120" Height="50" FontSize="16" FontWeight="Bold" Background="#F44336" Foreground="White" BorderThickness="0" IsEnabled="False" Cursor="Hand" Click="BtnStop_Click">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="5">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#DA190B"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#666666"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Border Background="#2196F3" CornerRadius="5" Padding="15,5" Margin="20,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="Port: 502" FontSize="14" Foreground="White" FontWeight="SemiBold"/>
-            </Border>
-        </StackPanel>
-
-        <Border Grid.Row="1" Grid.Column="1" Background="#007ACC" Height="30" CornerRadius="5" Margin="10">
-            <TextBlock x:Name="TxtStatus" Text="Ready" VerticalAlignment="Center" Margin="10,0" Foreground="White" FontWeight="SemiBold"/>
-        </Border>
-        
-        <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,20,0">
-            <Border Background="#000000" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="5">
-                <Image x:Name="CameraFeed" Stretch="Uniform"/>
+        <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,20,0">
+            <Border Background="#000000" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="3">
+                <Image x:Name="CameraFeed" Stretch="Uniform" Margin="10"/>
             </Border>
             <Border x:Name="RoiBorder"
                     BorderBrush="Red"
@@ -94,24 +32,15 @@
                     IsHitTestVisible="False"/>
         </Grid>
 
-        <Grid Grid.Row="2" Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Grid.Row="1" Text="Binarized Result" FontSize="14" FontWeight="SemiBold" Foreground="White" Margin="0,10,0,5"/>
-
+        <Grid Grid.Row="0" Grid.Column="1">
             <Border Grid.Row="2" Background="#000000" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="5">
-                <Image x:Name="BinarizedImageFeed" Stretch="Uniform"/>
+                <Image x:Name="BinarizedImageFeed" Stretch="Uniform" Margin="10"/>
             </Border>
         </Grid>
 
-        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Background="#252526" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="5" Padding="10">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <TextBox x:Name="TxtLog" Background="Transparent" Foreground="#CCCCCC" FontFamily="Consolas" FontSize="12" IsReadOnly="True" BorderThickness="0" TextWrapping="Wrap"/>
-            </ScrollViewer>
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Background="#252526" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="3" Margin="0 20 0 5" Padding="10">
+            <ListBox x:Name="TxtLog" Background="Transparent" Foreground="#CCCCCC" FontSize="12" BorderThickness="0"
+             ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
         </Border>
     </Grid>
 </Window>
