@@ -30,6 +30,7 @@ namespace finalProject.Views
         private DispatcherTimer sirenTimer;
         private bool sirenVisible = true;
         private FactoryIOControl factoryIOControl;
+        private DispatcherTimer connectionCheckTimer;
 
         public WorkersInfo()
         {
@@ -44,6 +45,8 @@ namespace finalProject.Views
 
             // factoryIO 서버 시작
             InitializeFactoryIO();
+
+            InitializeConnectionMonitor();
 
             // 창 닫기 이벤트 처리 추가
             this.Closing += WorkersInfo_Closing;
@@ -73,8 +76,6 @@ namespace finalProject.Views
 
                 // 창을 숨김 상태로 유지 (백그라운드 실행)
                 factoryIOControl.Hide();
-
-                Debug.WriteLine("Factory IO 서버가 백그라운드에서 시작되었습니다.");
             }
             catch (Exception ex)
             {
@@ -83,40 +84,114 @@ namespace finalProject.Views
             }
         }
 
+        private void InitializeConnectionMonitor()
+        {
+            connectionCheckTimer = new DispatcherTimer();
+            connectionCheckTimer.Interval = TimeSpan.FromSeconds(2); // 2초마다 확인
+            connectionCheckTimer.Tick += ConnectionCheckTimer_Tick;
+            connectionCheckTimer.Start();
+
+            Debug.WriteLine("✓ 연결 상태 모니터링 시작");
+        }
+
+        private void ConnectionCheckTimer_Tick(object sender, EventArgs e)
+        {
+            if (factoryIOControl == null) return;
+
+            // 연결 상태를 UI에 표시 (선택사항)
+            bool factoryConnected = factoryIOControl.IsConnected();
+            bool plcConnected = factoryIOControl.IsPLCConnected();
+
+            // 상태바나 텍스트에 표시하고 싶다면 여기에 추가
+            // 예: txtConnectionStatus.Text = $"Factory IO: {(factoryConnected ? "연결됨" : "대기 중")} | PLC: {(plcConnected ? "연결됨" : "끊김")}";
+
+            Debug.WriteLine($"[연결 상태] Factory IO: {factoryConnected}, PLC: {plcConnected}");
+        }
+
+
         private void btnStartWork_Click(object sender, RoutedEventArgs e)
         {
-            // Factory IO 연결 확인
-            if (factoryIOControl != null && factoryIOControl.IsConnected())
+            if (factoryIOControl == null)
             {
-                // Factory IO 시스템 시작
-                factoryIOControl.StartFactoryIOSystem();
-            }
-            else
-            {
-                MessageBox.Show("Factory IO가 연결되지 않았습니다.\n먼저 Factory IO를 실행하고 연결해주세요.",
-                    "연결 필요", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Factory IO 컨트롤러가 초기화되지 않았습니다.",
+                    "오류", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            // ResultDashboard 창 열기
+            // 1. Factory IO 연결 확인
+            if (!factoryIOControl.IsConnected())
+            {
+                var result = MessageBox.Show(
+                    "Factory IO가 연결되지 않았습니다.\n\n" +
+                    "Factory IO를 실행하고 Modbus TCP로 연결해주세요.\n" +
+                    "(IP: localhost, Port: 502)\n\n" +
+                    "Factory IO 없이 계속 진행하시겠습니까?",
+                    "Factory IO 연결 필요",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning
+                );
+
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
+            // 2. PLC 연결 확인 (선택사항)
+            if (!factoryIOControl.IsPLCConnected())
+            {
+                var result = MessageBox.Show(
+                    "PLC가 연결되지 않았습니다.\n\n" +
+                    "PLC 없이도 Factory IO는 동작하지만,\n" +
+                    "실제 PLC 제어는 불가능합니다.\n\n" +
+                    "PLC 없이 계속 진행하시겠습니까?",
+                    "PLC 연결 확인",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question
+                );
+
+                if (result == MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
+            // 3. Factory IO 시스템 시작 (PLC 메모리 값도 자동으로 설정됨)
+            factoryIOControl.StartFactoryIOSystem();
+
+            // 4. 시작 성공 메시지
+            MessageBox.Show(
+                "✅ 작업이 시작되었습니다!\n\n" +
+                $"- Factory IO: {(factoryIOControl.IsConnected() ? "가동 중" : "미연결")}\n" +
+                $"- PLC: {(factoryIOControl.IsPLCConnected() ? "제어 중" : "미연결")}\n" +
+                "- 컨베이어: 가동\n\n" +
+                "대시보드로 이동합니다.",
+                "작업 시작",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information
+            );
+
+            // 5. ResultDashboard 창 열기
             ResultDashboard dashboard = new ResultDashboard(factoryIOControl);
             dashboard.Show();
-            
-            // 현재 WorkersInfo 창 닫기 (선택사항)
+
+            // 6. 현재 WorkersInfo 창 닫기
             this.Close();
         }
 
         private void WorkersInfo_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // 타이머 정지
             sirenTimer?.Stop();
+            connectionCheckTimer?.Stop();
 
             try
             {
-                // SafetyCheck 리소스 정리는 유지합니다.
+                // SafetyCheck 리소스 정리
                 SafetyCheck.Cleanup();
 
-                // 아래 줄을 주석 처리하거나 삭제하세요.
-                // Application.Current.Shutdown(); 
+                // ⭐ FactoryIOControl은 정리하지 않음 (대시보드에서 사용 중)
+                // factoryIOControl은 ResultDashboard로 전달되므로 여기서 Dispose 하지 않습니다.
 
                 Debug.WriteLine("WorkersInfo 창이 닫혔습니다.");
             }

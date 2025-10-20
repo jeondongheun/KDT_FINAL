@@ -23,6 +23,8 @@ namespace finalProject.Views
         private NetworkStream stream;
         private DispatcherTimer plcTimer;
         private Thread serverThread;
+        private PLCManager plcManager;
+        private DispatcherTimer plcKeepAliveTimer;
         private bool isRunning = false;
         private bool isServerRunning = false;
         private bool _isClosing = false;
@@ -61,7 +63,6 @@ namespace finalProject.Views
         private bool normalSensorPrev = false;
         private bool errorCateSensorPrev = false;
 
-        private int convWithSensorStopTimer = 0;
         private const int CONV_RESTART_DELAY = 40;
         private int pusherTimer = 0;
         private const int PUSHER_ACTIVE_TIME = 20;
@@ -103,6 +104,7 @@ namespace finalProject.Views
 
             InitializeModbusServer();
             InitializePlcTimer();
+            InitializePLC();
 
             // 비전 시스템 초기화 로직
             _cameraManager = new CameraManager();
@@ -125,12 +127,30 @@ namespace finalProject.Views
             this.Closing += FactoryIOControl_Closing;
         }
 
-        public void StartFactoryIOSystem()
+        public void StartFactoryIOSystem()  // ⭐ void를 그대로 유지 (WorkersInfo에서 수정)
         {
             if (!isRunning && connectedClient != null && connectedClient.Connected)
             {
                 isRunning = true;
                 plcTimer.Start();
+
+                // ⭐⭐ PLC 컨베이어 가동 신호 전송 (%MX0 ON) ⭐⭐
+                if (plcManager?.IsConnected == true)
+                {
+                    bool plcSuccess = plcManager.SetConveyorRunning(true);
+                    if (plcSuccess)
+                    {
+                        LogMessage("✅ PLC 컨베이어 가동 신호 전송 성공 (%MX0 ON)");
+                    }
+                    else
+                    {
+                        LogMessage("⚠ PLC 컨베이어 가동 신호 전송 실패");
+                    }
+                }
+                else
+                {
+                    LogMessage("⚠ PLC 미연결 - 컨베이어 신호 전송 생략");
+                }
 
                 // 카메라도 함께 시작
                 if (!_cameraManager.StartCamera())
@@ -143,13 +163,53 @@ namespace finalProject.Views
                     LogMessage("카메라 시작됨.");
                 }
 
-                LogMessage("▶ 시스템 시작 - PLC 스캔 시작");
+                LogMessage("▶ 시스템 시작");
+                LogMessage("  - Factory IO 가동");
+                if (plcManager?.IsConnected == true)
+                {
+                    LogMessage("  - PLC 제어 활성화");
+                }
             }
+        }
+
+        public bool StopFactoryIOSystem()
+        {
+            if (isRunning)
+            {
+                isRunning = false;
+                plcTimer.Stop();
+                ResetAllOutputs();
+
+                // ⭐⭐ PLC 모든 신호 OFF ⭐⭐
+                if (plcManager?.IsConnected == true)
+                {
+                    bool plcSuccess = plcManager.ResetAllSignals();
+                    if (plcSuccess)
+                    {
+                        LogMessage("✅ PLC 신호 초기화 완료 (모든 신호 OFF)");
+                    }
+                    else
+                    {
+                        LogMessage("⚠ PLC 신호 초기화 실패");
+                    }
+                }
+
+                LogMessage("⏸ 시스템 정지 (외부 호출)");
+
+                return true;
+            }
+
+            return false;
         }
 
         public bool IsConnected()
         {
             return connectedClient != null && connectedClient.Connected;
+        }
+
+        public bool IsPLCConnected()
+        {
+            return plcManager?.IsConnected == true;
         }
 
         // 새 메서드 및 이벤트 핸들러 추가
@@ -221,6 +281,54 @@ namespace finalProject.Views
                 _roiProcessor.ProcessROI_Sensor2(currentFrame);
                 lastInspectionResult = _roiProcessor.LastInspectionResult;
                 currentFrame.Dispose();
+            }
+        }
+
+        private void InitializePLC()
+        {
+            try
+            {
+                // PLC IP 주소 확인 필요
+                plcManager = new PLCManager("192.168.0.200", 2004);
+
+                // 이벤트 핸들러 연결
+                plcManager.OnLogMessage += (msg) => LogMessage($"[PLC] {msg}");
+                plcManager.OnConnected += () =>
+                {
+                    LogMessage("PLC 연결 성공");
+                    Dispatcher.Invoke(() =>
+                    {
+                        LogMessage("PLC: 연결됨");
+                    });
+                };
+                plcManager.OnDisconnected += () =>
+                {
+                    LogMessage("PLC 연결 끊김");
+                    Dispatcher.Invoke(() =>
+                    {
+                        LogMessage("PLC: 끊김");
+                    });
+                };
+
+                // PLC 연결 시도
+                if (plcManager.Connect())
+                {
+                    // Keep-Alive 타이머 시작 (5초마다)
+                    plcKeepAliveTimer = new DispatcherTimer();
+                    plcKeepAliveTimer.Interval = TimeSpan.FromSeconds(5);
+                    plcKeepAliveTimer.Tick += (s, e) => plcManager?.UpdateKeepAlive();
+                    plcKeepAliveTimer.Start();
+
+                    LogMessage("✓ PLC 통신 준비 완료");
+                }
+                else
+                {
+                    LogMessage("⚠ PLC 연결 실패 - Factory IO만 사용 가능");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"⚠ PLC 초기화 실패: {ex.Message}");
             }
         }
 
@@ -539,29 +647,89 @@ namespace finalProject.Views
         {
             bool prodsEnter = factoryInputs[FactoryAddresses.INPUT_ERROR_DERECTED] && !prodsAtEntryPrev;
             prodsAtEntryPrev = factoryInputs[FactoryAddresses.INPUT_ERROR_DERECTED];
+
             if (prodsEnter)
             {
                 convWithSensorStop = true;
-                convWithSensorStopTimer = 0;
                 isInspecting = true;
 
-                if (!prodsRollerActive)
+                // ⭐⭐ PLC 컨베이어 정지 신호 추가 ⭐⭐
+                if (plcManager?.IsConnected == true)
                 {
-                    prodsBoxNeeded = true;
+                    bool stopSuccess = plcManager.SetConveyorRunning(false);
+                    if (stopSuccess)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            LogMessage("⏸ PLC 컨베이어 정지 (%MX0 OFF)");
+                        });
+                    }
                 }
 
+                // ⭐ 비동기 처리로 변경
                 Task.Run(() =>
                 {
-                    CaptureAndProcessROI_Sensor1();
-                    convWithSensorStop = false;
-                    isInspecting = false;
-                });
+                    try
+                    {
+                        CaptureAndProcessROI_Sensor1();
 
+                        // ⭐⭐ 검사 결과를 PLC로 전송 ⭐⭐
+                        if (plcManager?.IsConnected == true)
+                        {
+                            bool sendSuccess = plcManager.SendInspectionResult(lastInspectionResult);
+                            if (sendSuccess)
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    if (lastInspectionResult)
+                                    {
+                                        LogMessage("✅ PLC로 정상 제품 신호 전송 (%MX1)");
+                                    }
+                                    else
+                                    {
+                                        LogMessage("❌ PLC로 불량 제품 신호 전송 (%MX2)");
+                                    }
+                                });
+                            }
+                        }
+
+                        // ⭐ 처리 완료 후 플래그 해제
+                        System.Threading.Thread.Sleep(300); // 안정화 대기
+                        convWithSensorStop = false;
+                        isInspecting = false;
+
+                        // ⭐⭐ PLC 컨베이어 재가동 ⭐⭐
+                        if (plcManager?.IsConnected == true)
+                        {
+                            plcManager.SetConveyorRunning(true);
+                            Dispatcher.Invoke(() =>
+                            {
+                                LogMessage("▶ PLC 컨베이어 재가동 (%MX0 ON)");
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            LogMessage($"⚠ 검사 중 오류: {ex.Message}");
+                        });
+
+                        convWithSensorStop = false;
+                        isInspecting = false;
+
+                        // ⭐ 오류 발생 시에도 PLC 재가동
+                        if (plcManager?.IsConnected == true)
+                        {
+                            plcManager.SetConveyorRunning(true);
+                        }
+                    }
+                });
             }
 
+            // 조명 제어 로직 (기존과 동일)
             if (factoryInputs[FactoryAddresses.INPUT_ERROR_DERECTED])
             {
-                // 센서에 제품이 있을 때만 조명 제어
                 bool yellowLight = isInspecting;
                 bool greenLight = !isInspecting && lastInspectionResult;
                 bool redLight = !isInspecting && !lastInspectionResult;
@@ -572,15 +740,14 @@ namespace finalProject.Views
             }
             else
             {
-                // 센서에 제품이 없으면 모든 조명 OFF
                 factoryCoils[FactoryAddresses.COIL_DEFECTED_LIGHT] = false;
                 factoryCoils[FactoryAddresses.COIL_NORMAL_LIGHT] = false;
                 factoryCoils[FactoryAddresses.COIL_ERROR_LIGHT] = false;
             }
 
+            // ⭐ 중요: convWithSensorStop 상태에 따라 컨베이어 제어
             factoryCoils[FactoryAddresses.COIL_CONV_WITH_SENSOR] = !convWithSensorStop;
             factoryCoils[FactoryAddresses.COIL_BOX_EMITTER] = prodsBoxNeeded && !prodsRollerActive;
-
         }
 
         private void ExecuteNormalSortingLogic()
@@ -682,6 +849,26 @@ namespace finalProject.Views
                 Task.Run(() =>
                 {
                     CaptureAndProcessROI_Sensor2();
+
+                    if (plcManager?.IsConnected == true)
+                    {
+                        bool sendSuccess = plcManager.SendInspectionResult(lastInspectionResult);
+                        if (sendSuccess)
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                if (lastInspectionResult)
+                                {
+                                    LogMessage("✅ PLC로 정상 제품 신호 전송 (%MX1)");
+                                }
+                                else
+                                {
+                                    LogMessage("❌ PLC로 불량 제품 신호 전송 (%MX2)");
+                                }
+                            });
+                        }
+                    }
+
                     shouldPushError = !_roiProcessor.LastDetectedDefects.Contains("pin-hole");
                     errorSortConvStop = false;
                     isClassifying = false;
@@ -799,7 +986,6 @@ namespace finalProject.Views
             normalSensorPrev = false;
             errorCateSensorPrev = false;
 
-            convWithSensorStopTimer = 0;
             pusherTimer = 0;
             productCount = 0;
             errorCount = 0;
@@ -836,6 +1022,11 @@ namespace finalProject.Views
             });
         }
 
+        public bool IsSystemRunning()
+        {
+            return isRunning;
+        }
+
         public void ShowWindow()
         {
             this.Show();
@@ -851,59 +1042,44 @@ namespace finalProject.Views
         {
             Console.WriteLine("=== FactoryIOControl 종료 시작 ===");
             _isClosing = true;
-
             try
             {
                 // 1. PLC 타이머 정지
                 isRunning = false;
                 plcTimer?.Stop();
-                Console.WriteLine("PLC 타이머 정지 완료");
+                plcKeepAliveTimer?.Stop();
+                Console.WriteLine("타이머 정지 완료");
 
                 // 2. 출력 리셋
                 ResetAllOutputs();
                 Console.WriteLine("출력 리셋 완료");
 
-                // 3. 카메라 정지 ⭐
+                // ⭐⭐ 3. PLC 신호 리셋 및 연결 해제 ⭐⭐
+                if (plcManager != null)
+                {
+                    LogMessage("PLC 종료 처리 중...");
+                    plcManager.ResetAllSignals();
+                    System.Threading.Thread.Sleep(300);
+                    plcManager.Dispose();
+                    Console.WriteLine("PLC 정리 완료");
+                }
+
+                // 4. 카메라 정지
                 StopCameraResources();
 
-                // 4. 네트워크 스트림 정리
+                // 5. 네트워크 스트림 정리
                 isServerRunning = false;
+                try { stream?.Close(); stream?.Dispose(); stream = null; } catch { }
+                try { connectedClient?.Close(); connectedClient = null; } catch { }
+                try { modbusServer?.Stop(); modbusServer = null; } catch { }
 
-                try
-                {
-                    stream?.Close();
-                    stream?.Dispose();
-                    stream = null;
-                    Console.WriteLine("Stream 정리 완료");
-                }
-                catch { }
-
-                try
-                {
-                    connectedClient?.Close();
-                    connectedClient = null;
-                    Console.WriteLine("Client 정리 완료");
-                }
-                catch { }
-
-                try
-                {
-                    modbusServer?.Stop();
-                    modbusServer = null;
-                    Console.WriteLine("Modbus 서버 정지 완료");
-                }
-                catch { }
-
-                // 5. 서버 스레드 종료 대기
+                // 6. 서버 스레드 종료 대기
                 if (serverThread != null && serverThread.IsAlive)
                 {
-                    serverThread.Join(1000); // 최대 1초 대기
-                    Console.WriteLine("서버 스레드 종료 완료");
+                    serverThread.Join(1000);
                 }
 
-                // 6. 약간의 대기 시간
                 System.Threading.Thread.Sleep(300);
-
                 Console.WriteLine("=== FactoryIOControl 종료 완료 ===");
             }
             catch (Exception ex)
