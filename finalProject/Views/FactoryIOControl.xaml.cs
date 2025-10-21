@@ -85,6 +85,7 @@ namespace finalProject.Views
         private readonly ImageProcessor _imageProcessor;
         private readonly VisionProcessor _visionProcessor;
         private readonly ROIProcessor _roiProcessor;
+        private InspectionStatistics inspectionStats;
         private readonly string _savePath = @"C:\Users\user\Desktop\PCB";
         private Bitmap _currentFrame;
         private readonly object _frameLock = new object();
@@ -105,6 +106,9 @@ namespace finalProject.Views
             InitializeModbusServer();
             InitializePlcTimer();
             InitializePLC();
+
+            // 통계 관리자 초기화
+            inspectionStats = new InspectionStatistics();
 
             // 비전 시스템 초기화 로직
             _cameraManager = new CameraManager();
@@ -673,7 +677,37 @@ namespace finalProject.Views
                     {
                         CaptureAndProcessROI_Sensor1();
 
-                        // ⭐⭐ 검사 결과를 PLC로 전송 ⭐⭐
+                        Dispatcher.Invoke(() =>
+                        {
+                            // 불량 유형 리스트 가져오기
+                            List<string> detectedDefects = _roiProcessor.LastDetectedDefects?.ToList() ?? new List<string>();
+
+                            // 통계 기록
+                            inspectionStats.RecordInspection(lastInspectionResult, detectedDefects);
+
+                            // ResultDashboard UI 업데이트 (ResultDashboard가 열려있는 경우)
+                            UpdateDashboardStatistics();
+
+                            // 로그 출력
+                            if (lastInspectionResult)
+                            {
+                                LogMessage($"✅ 정상 제품 [{inspectionStats.TotalInspected}번째 검사]");
+                            }
+                            else
+                            {
+                                string defectTypes = detectedDefects.Count > 0
+                                    ? string.Join(", ", detectedDefects)
+                                    : "분류 안됨";
+                                LogMessage($"❌ 불량 제품 [{inspectionStats.TotalInspected}번째 검사] - 유형: {defectTypes}");
+                            }
+
+                            LogMessage($"📊 현재 통계 - 총: {inspectionStats.TotalInspected}, " +
+                                      $"정상: {inspectionStats.NormalCount}, " +
+                                      $"불량: {inspectionStats.DefectCount}, " +
+                                      $"정상률: {inspectionStats.NormalRate}%");
+                        });
+
+                        // PLC로 검사 결과 전송
                         if (plcManager?.IsConnected == true)
                         {
                             bool sendSuccess = plcManager.SendInspectionResult(lastInspectionResult);
@@ -693,12 +727,11 @@ namespace finalProject.Views
                             }
                         }
 
-                        // ⭐ 처리 완료 후 플래그 해제
-                        System.Threading.Thread.Sleep(300); // 안정화 대기
+                        System.Threading.Thread.Sleep(300);
                         convWithSensorStop = false;
                         isInspecting = false;
 
-                        // ⭐⭐ PLC 컨베이어 재가동 ⭐⭐
+                        // PLC 컨베이어 재가동
                         if (plcManager?.IsConnected == true)
                         {
                             plcManager.SetConveyorRunning(true);
@@ -718,7 +751,6 @@ namespace finalProject.Views
                         convWithSensorStop = false;
                         isInspecting = false;
 
-                        // ⭐ 오류 발생 시에도 PLC 재가동
                         if (plcManager?.IsConnected == true)
                         {
                             plcManager.SetConveyorRunning(true);
@@ -835,51 +867,65 @@ namespace finalProject.Views
             // 1. 불량 종류 분석
             bool errorEnter = factoryInputs[FactoryAddresses.INPUT_ERROR_SORT_SENSOR] && !errorEnterPrev;
             errorEnterPrev = factoryInputs[FactoryAddresses.INPUT_ERROR_SORT_SENSOR];
+
             if (errorEnter)
             {
+                // ⭐ 컨베이어 정지 시작
                 errorSortConvStop = true;
                 errorSortConvStopTimer = 0;
-                isClassifying = true;
 
                 if (!errorsRollerActive)
                 {
                     errorsBoxNeeded = true;
                 }
 
-                Task.Run(() =>
-                {
-                    CaptureAndProcessROI_Sensor2();
+                // ⭐⭐ 카메라 작업 없이 이미 분석된 결과만 사용 ⭐⭐
+                List<string> detectedDefects = _roiProcessor.LastDetectedDefects?.ToList() ?? new List<string>();
+                string defectInfo = detectedDefects.Count > 0
+                    ? string.Join(", ", detectedDefects)
+                    : "분류 안됨";
 
-                    if (plcManager?.IsConnected == true)
+                LogMessage($"🔍 불량 분류 - 유형: {defectInfo}");
+
+                // PLC로 결과 전송 (선택사항)
+                if (plcManager?.IsConnected == true)
+                {
+                    bool sendSuccess = plcManager.SendInspectionResult(lastInspectionResult);
+                    if (sendSuccess)
                     {
-                        bool sendSuccess = plcManager.SendInspectionResult(lastInspectionResult);
-                        if (sendSuccess)
+                        if (lastInspectionResult)
                         {
-                            Dispatcher.Invoke(() =>
-                            {
-                                if (lastInspectionResult)
-                                {
-                                    LogMessage("✅ PLC로 정상 제품 신호 전송 (%MX1)");
-                                }
-                                else
-                                {
-                                    LogMessage("❌ PLC로 불량 제품 신호 전송 (%MX2)");
-                                }
-                            });
+                            LogMessage("✅ PLC로 정상 제품 신호 전송 (%MX1)");
+                        }
+                        else
+                        {
+                            LogMessage("❌ PLC로 불량 제품 신호 전송 (%MX2)");
                         }
                     }
+                }
 
-                    shouldPushError = !_roiProcessor.LastDetectedDefects.Contains("pin-hole");
-                    errorSortConvStop = false;
-                    isClassifying = false;
-                });
+                // pin-hole이 아니면 pusher로 밀어냄
+                shouldPushError = !detectedDefects.Contains("pin-hole");
             }
 
+            // ⭐⭐ 컨베이어 정지 타이머 (2초 = 50ms * 40 = 2000ms) ⭐⭐
+            if (errorSortConvStop)
+            {
+                errorSortConvStopTimer++;
+                if (errorSortConvStopTimer >= ERROR_SORT_CONV_RESTART_DELAY)
+                {
+                    errorSortConvStop = false;
+                    errorSortConvStopTimer = 0;
+                    LogMessage("▶ 불량 분류 컨베이어 재가동");
+                }
+            }
+
+            // 조명 제어
             if (factoryInputs[FactoryAddresses.INPUT_ERROR_SORT_SENSOR])
             {
                 // 센서에 제품이 있을 때만 조명 제어
-                bool yellowLight = !isClassifying && shouldPushError;
-                bool redLight = !isInspecting && !shouldPushError;
+                bool yellowLight = shouldPushError;
+                bool redLight = !shouldPushError;
 
                 factoryCoils[FactoryAddresses.COIL_REPROCESSING] = yellowLight;
                 factoryCoils[FactoryAddresses.COIL_DISPOSED_LIGTH] = redLight;
@@ -907,7 +953,7 @@ namespace finalProject.Views
             if (errorPusher)
             {
                 errorPusherTimer++;
-                if (errorPusherTimer >= PUSHER_ACTIVE_TIME)
+                if (errorPusherTimer >= ERROR_PUSHER_ACTIVE_TIME)
                 {
                     deletePCBStop = false;
                     errorPusher = false;
@@ -957,7 +1003,49 @@ namespace finalProject.Views
             factoryCoils[FactoryAddresses.COIL_ERROR_ROLLER] = errorsRollerActive;
         }
 
-        private void ResetAllOutputs()
+        private void UpdateDashboardStatistics()
+        {
+            try
+            {
+                // ResultDashboard 인스턴스를 찾아서 업데이트
+                // (ResultDashboard가 별도 창으로 열려있거나, 참조를 가지고 있다면)
+
+                // 방법 1: ResultDashboard의 정적 메서드나 싱글톤 패턴 사용
+                // ResultDashboard.Instance?.UpdateStatistics(inspectionStats);
+
+                // 방법 2: 이벤트를 통한 업데이트
+                OnStatisticsUpdated?.Invoke(inspectionStats);
+
+                // 방법 3: 직접 참조를 통한 업데이트 (ResultDashboard 인스턴스를 멤버로 가지고 있는 경우)
+                // if (resultDashboard != null)
+                // {
+                //     resultDashboard.UpdateUI(inspectionStats);
+                // }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"⚠ Dashboard 업데이트 오류: {ex.Message}");
+            }
+        }
+
+        // 5. 통계 이벤트 선언 (방법 2를 사용하는 경우)
+        public event Action<InspectionStatistics> OnStatisticsUpdated;
+
+        // 6. 통계 초기화 메서드
+        public void ResetStatistics()
+        {
+            inspectionStats.Reset();
+            LogMessage("📊 통계가 초기화되었습니다.");
+            UpdateDashboardStatistics();
+        }
+
+        // 7. 통계 데이터 접근 메서드 (외부에서 통계 조회용)
+        public InspectionStatistics GetCurrentStatistics()
+        {
+            return inspectionStats;
+        }
+
+        private void ResetAllOutputs(bool resetStatistics = false)
         {
             Array.Clear(factoryCoils, 0, factoryCoils.Length);
 
@@ -995,6 +1083,13 @@ namespace finalProject.Views
             errorPusherTimer = 0;
             isInspecting = false;
             lastInspectionResult = true;
+
+            // 통계도 리셋할지 선택
+            if (resetStatistics)
+            {
+                inspectionStats.Reset();
+                LogMessage("📊 통계도 함께 초기화되었습니다.");
+            }
         }
 
         // 분석 결과 로그 메세지 연동

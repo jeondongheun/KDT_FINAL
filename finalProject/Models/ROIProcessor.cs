@@ -34,9 +34,6 @@ namespace finalProject.Models
         }
 
         /// <summary>
-        /// 센서1: 정상/불량 판정만 수행
-        /// </summary>
-        /// <summary>
         /// 센서1: 불량 유무 검출
         /// </summary>
         public void ProcessROI_Sensor1(Bitmap currentFrame)
@@ -86,15 +83,20 @@ namespace finalProject.Models
                 if (detections == null || detections.Count == 0)
                 {
                     LastInspectionResult = true;
+                    LastDetectedDefects = new List<string>(); // ⭐ 정상일 때 빈 리스트
                     LogMessageRequested?.Invoke("[센서1] 결과 : 정상");
                 }
                 else
                 {
                     LastInspectionResult = false;
-                    LogMessageRequested?.Invoke($"[센서1] 결과 : 불량 (총 {detections.Count}개)");
 
                     var defectCounts = detections.GroupBy(d => d.Label)
                                                  .ToDictionary(g => g.Key, g => g.Count());
+
+                    // ⭐⭐ 불량 종류 저장 (여기가 핵심!) ⭐⭐
+                    LastDetectedDefects = defectCounts.Keys.ToList();
+
+                    LogMessageRequested?.Invoke($"[센서1] 결과 : 불량 (총 {detections.Count}개)");
 
                     foreach (var defect in defectCounts)
                     {
@@ -105,6 +107,8 @@ namespace finalProject.Models
             catch (Exception ex)
             {
                 LogMessageRequested?.Invoke($"[센서1] 이미지 처리 오류: {ex.Message}");
+                // ⭐ 예외 발생 시에도 초기화
+                LastDetectedDefects = new List<string>();
             }
             finally
             {

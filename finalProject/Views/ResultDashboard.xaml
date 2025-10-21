@@ -8,80 +8,76 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="4*"/>
+            <RowDefinition Height="4*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="1" Margin="12,0" Padding="14"
-                Background="#181B22" CornerRadius="14">
+        <!-- 제목 -->
+        <TextBlock Margin="10,0,10,0" Text="PCB Defect Inspection" Foreground="#EDEFF3" FontSize="40" FontWeight="Bold" VerticalAlignment="Center"/>
+
+        <!-- 필터 바 -->
+        <StackPanel Grid.Row="1" Margin="10,0,10,0" VerticalAlignment="Center">
             <DockPanel LastChildFill="False">
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
                     <DatePicker x:Name="FromDate" Width="160"/>
                     <TextBlock Text="→" Foreground="#98A2B3" FontSize="18" Margin="8,0" VerticalAlignment="Center"/>
-                    <DatePicker x:Name="ToDate" Width="160" Margin="8,0,0,0"/>
+                    <DatePicker x:Name="ToDate" Width="160"/>
                     <ComboBox x:Name="ProductFilter" Width="140" Margin="10,0,0,0">
                         <ComboBoxItem Content="All" IsSelected="True"/>
                         <ComboBoxItem Content="short"/>
                         <ComboBoxItem Content="mousebite"/>
                         <ComboBoxItem Content="pin-hole"/>
                         <ComboBoxItem Content="spur"/>
+                        <ComboBoxItem Content="open"/>
+                        <ComboBoxItem Content="copper"/>
                     </ComboBox>
                 </StackPanel>
-                <Button x:Name="BtnExport" DockPanel.Dock="Right"
-                        Content="Export CSV"
-                        Padding="16,8" Margin="8,0,0,0"
-                        Background="#273043" Foreground="#EDEFF3"
-                        BorderBrush="#2E3A4D"/>
-                <Button x:Name="BtnCamera" DockPanel.Dock="Right"
-                        Content="Vision" Click="BtnCamera_Click"
-                        Padding="16,8" Margin="8,0,0,0"
-                        Background="#273043" Foreground="#EDEFF3"
-                        BorderBrush="#2E3A4D"/>
+                <Button x:Name="BtnExport" DockPanel.Dock="Right" Content="Export CSV" Margin="8,0,0,0"
+                        Background="#273043" Foreground="#EDEFF3" BorderBrush="#2E3A4D" Width="90" Height="30"/>
+                <Button x:Name="BtnCamera" DockPanel.Dock="Right" Content="Vision" Click="BtnCamera_Click" Margin="8,0,0,0"
+                        Background="#273043" Foreground="#EDEFF3" BorderBrush="#2E3A4D" Width="90" Height="30"/>
             </DockPanel>
-        </Border>
+        </StackPanel>
 
         <!-- KPI -->
-        <Grid Grid.Row="2" Margin="0,8,0,0">
+        <Grid Grid.Row="2" Margin="5,0,5,0" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <StackPanel>
-                    <TextBlock Text="Total Inspected" Foreground="#98A2B3" FontSize="16"/>
+            <StackPanel Grid.Column="0" Background="#181B22" Margin="7">
+                <GroupBox Header="Total Inspected" Margin="10" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
                     <TextBlock x:Name="TxtTotal" Text="0" Foreground="#EDEFF3" FontSize="42" FontWeight="SemiBold"/>
-                </StackPanel>
-            </Border>
+                </GroupBox>
+            </StackPanel>
 
-            <Border Grid.Column="1" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <StackPanel>
-                    <TextBlock Text="Defects (NG)" Foreground="#98A2B3" FontSize="16"/>
+            <StackPanel Grid.Column="1" Background="#181B22" Margin="7">
+                <GroupBox Header="Defects (NG)" Margin="10" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
                     <TextBlock x:Name="TxtNg" Text="0" Foreground="#FF6B6B" FontSize="42" FontWeight="SemiBold"/>
-                </StackPanel>
-            </Border>
+                </GroupBox>
+            </StackPanel>
 
-            <Border Grid.Column="2" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <StackPanel>
-                    <TextBlock Text="Normal Rate" Foreground="#98A2B3" FontSize="16"/>
-                    <TextBlock x:Name="TxtConf" Text="0%" Foreground="#5EE493" FontSize="42" FontWeight="SemiBold"/>
-                </StackPanel>
-            </Border>
+            <StackPanel Grid.Column="2" Background="#181B22" Margin="7">
+                <GroupBox Header="Normal Rate" Margin="10" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
+                    <TextBlock x:Name="TxtConf" Text="0" Foreground="#5EE493" FontSize="42" FontWeight="SemiBold"/>
+                </GroupBox>
+            </StackPanel>
 
-            <Border Grid.Column="3" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <StackPanel>
-                    <TextBlock Text="Defect Rate" Foreground="#98A2B3" FontSize="16"/>
-                    <TextBlock x:Name="TxtRate" Text="0%" Foreground="#F0E06E" FontSize="42" FontWeight="SemiBold"/>
-                </StackPanel>
-            </Border>
+            <StackPanel Grid.Column="3" Background="#181B22" Margin="7">
+                <GroupBox Header="Defect Rate" Margin="10" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
+                    <TextBlock x:Name="TxtRate" Text="0" Foreground="#F0E06E" FontSize="42" FontWeight="SemiBold"/>
+                </GroupBox>
+            </StackPanel>
         </Grid>
 
         <!-- 하단: 그래프 + 표 -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="3" Margin="5,5,5,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
@@ -92,25 +88,20 @@
             </Grid.RowDefinitions>
 
             <!-- Defect Rate -->
-            <Border Grid.Row="0" Grid.Column="0" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Defect Rate over Time" Foreground="#98A2B3" FontSize="16"/>
-                    <Canvas x:Name="LineChart" Grid.Row="1" Margin="0,8,0,0" Background="#141821">
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Background="#181B22" Margin="5" >
+                <GroupBox Header="Defect Rate over Time" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
+                    <Canvas x:Name="LineChart" Margin="0,8,0,0" Background="#141821">
                         <Line X1="40" Y1="10" X2="40" Y2="230" Stroke="#232A36" StrokeThickness="1"/>
                         <Line X1="40" Y1="230" X2="760" Y2="230" Stroke="#232A36" StrokeThickness="1"/>
                     </Canvas>
-                </Grid>
-            </Border>
+                </GroupBox>
+            </StackPanel>
+
 
             <!-- System Status -->
-            <Border Grid.Row="0" Grid.Column="1" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <StackPanel>
-                    <TextBlock Text="System Status" Foreground="#98A2B3" FontSize="16" Margin="0,0,0,8"/>
-                    <UniformGrid Rows="4" Columns="2">
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="5" Background="#181B22">
+                <GroupBox Header="System Status" Margin="7" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
+                    <UniformGrid Rows="4" Columns="2" Margin="10">
                         <TextBlock Text="CPU" Foreground="#98A2B3" FontSize="16"/>
                         <TextBlock x:Name="TxtCpu" Text="-" Foreground="#EDEFF3" FontSize="16" HorizontalAlignment="Right"/>
                         <TextBlock Text="Memory" Foreground="#98A2B3" FontSize="16"/>
@@ -120,62 +111,18 @@
                         <TextBlock Text="Network" Foreground="#98A2B3" FontSize="16"/>
                         <TextBlock Text="OK" Foreground="#5EE493" FontSize="16" HorizontalAlignment="Right"/>
                     </UniformGrid>
-                </StackPanel>
-            </Border>
+                </GroupBox>
+            </StackPanel>
 
-            <!-- Pie -->
-            <Border Grid.Row="1" Grid.Column="0" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="220"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Defects by Product" Foreground="#98A2B3" FontSize="16"/>
-                    <Grid Grid.Row="1" Grid.Column="0">
-                        <Canvas x:Name="PieCanvas" Margin="0,6,0,0"/>
-                    </Grid>
-
-                    <!-- 범례 -->
-                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <Rectangle Width="14" Height="14" Fill="#3DA5FF" Margin="0,0,8,0"/>
-                            <TextBlock Text="short" Foreground="#EDEFF3"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <Rectangle Width="14" Height="14" Fill="#FF6B6B" Margin="0,0,8,0"/>
-                            <TextBlock Text="mousebite" Foreground="#EDEFF3"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <Rectangle Width="14" Height="14" Fill="#5EE493" Margin="0,0,8,0"/>
-                            <TextBlock Text="pin-hole" Foreground="#EDEFF3"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Rectangle Width="14" Height="14" Fill="#F0E06E" Margin="0,0,8,0"/>
-                            <TextBlock Text="spur" Foreground="#EDEFF3"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Recent Results -->
-            <Border Grid.Row="1" Grid.Column="1" Margin="12" Padding="18" CornerRadius="14" Background="#181B22">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Recent Results" Foreground="#98A2B3" FontSize="16"/>
+            <!-- Recent Result -->
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="5" Background="#181B22">
+                <GroupBox Margin="7" Header="Recent Results" Foreground="#98A2B3" FontSize="16" BorderThickness="0">
                     <DataGrid x:Name="GridRecent" Grid.Row="1" Margin="0,8,0,0"
-                              AutoGenerateColumns="True" HeadersVisibility="Column"
-                              Background="#1E232E" Foreground="#EDEFF3"
-                              BorderBrush="#222833" HorizontalGridLinesBrush="#222833" VerticalGridLinesBrush="#222833"
-                              RowBackground="#202735" AlternatingRowBackground="#1E232E"
-                              IsReadOnly="True" RowHeight="34" FontSize="14">
+          AutoGenerateColumns="True" HeadersVisibility="Column"
+          Background="#1E232E" Foreground="#EDEFF3"
+          BorderBrush="#222833" HorizontalGridLinesBrush="#222833" VerticalGridLinesBrush="#222833"
+          RowBackground="#202735" AlternatingRowBackground="#1E232E"
+          IsReadOnly="True" RowHeight="34" FontSize="14">
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="Background" Value="#1D2330"/>
@@ -200,8 +147,79 @@
                             </Style>
                         </DataGrid.RowStyle>
                     </DataGrid>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="4" Margin="10" Background="#181B22">
+            <StackPanel Background="#181B22" VerticalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="220"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Pie Chart 1 -->
+                    <Viewbox Grid.Column="0" Margin="20">
+                        <Canvas x:Name="PieCanvas" Width="200" Height="200"/>
+                    </Viewbox>
+
+                    <!-- 범례 1 -->
+                    <StackPanel Grid.Column="1" Margin="7" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#3DA5FF" Margin="0,0,8,0"/>
+                            <TextBlock Text="short" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#FF6B6B" Margin="0,0,8,0"/>
+                            <TextBlock Text="mousebite" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#5EE493" Margin="0,0,8,0"/>
+                            <TextBlock Text="pin-hole" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#F0E06E" Margin="0,0,8,0"/>
+                            <TextBlock Text="spur" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#D498AD" Margin="0,0,8,0"/>
+                            <TextBlock Text="open" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="14" Height="14" Fill="#A6A0D8" Margin="0,0,8,0"/>
+                            <TextBlock Text="copper" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Pie Chart 2 -->
+                    <Viewbox Grid.Column="2" Margin="20">
+                        <Canvas x:Name="PieCanvas2" Width="200" Height="200"/>
+                    </Viewbox>
+
+                    <!-- 범례 2 -->
+                    <StackPanel Grid.Column="3" Margin="7" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#3DA5FF" Margin="0,0,8,0"/>
+                            <TextBlock Text="1 ~ 2개" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#FF6B6B" Margin="0,0,8,0"/>
+                            <TextBlock Text="3 ~ 4개" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Rectangle Width="14" Height="14" Fill="#5EE493" Margin="0,0,8,0"/>
+                            <TextBlock Text="5 ~ 6개" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="14" Height="14" Fill="#F0E06E" Margin="0,0,8,0"/>
+                            <TextBlock Text="7개 이상" Foreground="#EDEFF3"/>
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
-            </Border>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

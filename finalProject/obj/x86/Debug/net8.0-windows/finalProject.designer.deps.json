@@ -1,0 +1,1494 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "AForge/2.2.5": {
+        "runtime": {
+          "lib/AForge.dll": {
+            "assemblyVersion": "2.2.5.0",
+            "fileVersion": "2.2.5.0"
+          }
+        }
+      },
+      "AForge.Imaging/2.2.5": {
+        "dependencies": {
+          "AForge": "2.2.5",
+          "AForge.Math": "2.2.5"
+        },
+        "runtime": {
+          "lib/AForge.Imaging.dll": {
+            "assemblyVersion": "2.2.5.0",
+            "fileVersion": "2.2.5.0"
+          }
+        }
+      },
+      "AForge.Math/2.2.5": {
+        "dependencies": {
+          "AForge": "2.2.5"
+        },
+        "runtime": {
+          "lib/AForge.Math.dll": {
+            "assemblyVersion": "2.2.5.0",
+            "fileVersion": "2.2.5.0"
+          }
+        }
+      },
+      "AForge.Video/2.2.5": {
+        "dependencies": {
+          "AForge": "2.2.5"
+        },
+        "runtime": {
+          "lib/AForge.Video.dll": {
+            "assemblyVersion": "2.2.5.0",
+            "fileVersion": "2.2.5.0"
+          }
+        }
+      },
+      "AForge.Video.DirectShow/2.2.5": {
+        "dependencies": {
+          "AForge.Video": "2.2.5"
+        },
+        "runtime": {
+          "lib/AForge.Video.DirectShow.dll": {
+            "assemblyVersion": "2.2.5.0",
+            "fileVersion": "2.2.5.0"
+          }
+        }
+      },
+      "CSharpMarkup.WinUI/3.1.2": {
+        "dependencies": {
+          "Uno.WinUI": "6.0.465"
+        },
+        "runtime": {
+          "lib/net8.0/CSharpMarkup.WinUI.dll": {
+            "assemblyVersion": "3.1.2.0",
+            "fileVersion": "3.1.2.0"
+          }
+        }
+      },
+      "CSharpMarkup.WinUI.LiveChartsCore.SkiaSharpView/3.1.2": {
+        "dependencies": {
+          "CSharpMarkup.WinUI": "3.1.2",
+          "LiveChartsCore.SkiaSharpView.Uno.WinUI": "2.0.0-rc5.3"
+        },
+        "runtime": {
+          "lib/net8.0/CSharpMarkup.WinUI.LiveChartsCore.SkiaSharpView.dll": {
+            "assemblyVersion": "3.1.2.0",
+            "fileVersion": "3.1.2.0"
+          }
+        }
+      },
+      "EasyModbusTCP/5.6.0": {
+        "runtime": {
+          "lib/net40/EasyModbus.dll": {
+            "assemblyVersion": "5.6.0.0",
+            "fileVersion": "5.6.0.0"
+          }
+        }
+      },
+      "FontAwesome.WPF/4.7.0.9": {
+        "runtime": {
+          "lib/net40/FontAwesome.WPF.dll": {
+            "assemblyVersion": "4.7.0.37774",
+            "fileVersion": "4.7.0.9"
+          }
+        }
+      },
+      "HarfBuzzSharp/7.3.0.3": {
+        "dependencies": {
+          "HarfBuzzSharp.NativeAssets.Win32": "7.3.0.3",
+          "HarfBuzzSharp.NativeAssets.macOS": "7.3.0.3"
+        },
+        "runtime": {
+          "lib/net6.0/HarfBuzzSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "7.3.0.3"
+          }
+        }
+      },
+      "HarfBuzzSharp.NativeAssets.macOS/7.3.0.3": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libHarfBuzzSharp.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "HarfBuzzSharp.NativeAssets.Win32/7.3.0.3": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libHarfBuzzSharp.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libHarfBuzzSharp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libHarfBuzzSharp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore/2.0.0-rc5.3": {
+        "runtime": {
+          "lib/net8.0-windows7.0/LiveChartsCore.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.Behaviours/2.0.0-rc5.3": {
+        "dependencies": {
+          "LiveChartsCore": "2.0.0-rc5.3"
+        },
+        "runtime": {
+          "lib/net8.0/LiveChartsCore.Behaviours.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.SkiaSharpView/2.0.0-rc5.3": {
+        "dependencies": {
+          "LiveChartsCore": "2.0.0-rc5.3",
+          "SkiaSharp": "2.88.9",
+          "SkiaSharp.HarfBuzz": "2.88.9"
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/LiveChartsCore.SkiaSharpView.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "LiveChartsCore.SkiaSharpView.Uno.WinUI/2.0.0-rc5.3": {
+        "dependencies": {
+          "LiveChartsCore.Behaviours": "2.0.0-rc5.3",
+          "LiveChartsCore.SkiaSharpView": "2.0.0-rc5.3",
+          "SkiaSharp.Views.Uno.WinUI": "2.88.9",
+          "Uno.WinUI": "6.0.465"
+        },
+        "runtime": {
+          "lib/net8.0/LiveChartsCore.SkiaSharpView.Uno.WinUI.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "Microsoft.ML.OnnxRuntime/1.22.1": {
+        "dependencies": {
+          "Microsoft.ML.OnnxRuntime.Managed": "1.22.1"
+        },
+        "runtimeTargets": {
+          "runtimes/android/native/onnxruntime.aar": {
+            "rid": "android",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/ios/native/onnxruntime.xcframework.zip": {
+            "rid": "ios",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-arm64/native/libonnxruntime.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-arm64/native/libonnxruntime_providers_shared.so": {
+            "rid": "linux-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libonnxruntime.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/linux-x64/native/libonnxruntime_providers_shared.so": {
+            "rid": "linux-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-arm64/native/libonnxruntime.dylib": {
+            "rid": "osx-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/osx-x64/native/libonnxruntime.dylib": {
+            "rid": "osx-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-arm64/native/onnxruntime.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-arm64/native/onnxruntime.lib": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-arm64/native/onnxruntime_providers_shared.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-arm64/native/onnxruntime_providers_shared.lib": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/onnxruntime.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-x64/native/onnxruntime.lib": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/onnxruntime_providers_shared.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-x64/native/onnxruntime_providers_shared.lib": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/onnxruntime.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-x86/native/onnxruntime.lib": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/onnxruntime_providers_shared.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "1.22.25.627"
+          },
+          "runtimes/win-x86/native/onnxruntime_providers_shared.lib": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Microsoft.ML.OnnxRuntime.Managed/1.22.1": {
+        "dependencies": {
+          "System.Memory": "4.6.3",
+          "System.Numerics.Tensors": "9.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.ML.OnnxRuntime.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Microsoft.NETCore.Platforms/1.1.0": {},
+      "Microsoft.NETCore.Targets/1.1.0": {},
+      "Microsoft.Win32.SystemEvents/8.0.0": {
+        "runtime": {
+          "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.23.53103"
+          }
+        }
+      },
+      "ModernWpfUI/0.9.6": {
+        "runtime": {
+          "lib/net5.0-windows7.0/ModernWpf.Controls.dll": {
+            "assemblyVersion": "0.9.6.0",
+            "fileVersion": "0.9.6.0"
+          },
+          "lib/net5.0-windows7.0/ModernWpf.dll": {
+            "assemblyVersion": "0.9.6.0",
+            "fileVersion": "0.9.6.0"
+          }
+        },
+        "resources": {
+          "lib/net5.0-windows7.0/af-ZA/ModernWpf.Controls.resources.dll": {
+            "locale": "af-ZA"
+          },
+          "lib/net5.0-windows7.0/af-ZA/ModernWpf.resources.dll": {
+            "locale": "af-ZA"
+          },
+          "lib/net5.0-windows7.0/am-ET/ModernWpf.Controls.resources.dll": {
+            "locale": "am-ET"
+          },
+          "lib/net5.0-windows7.0/am-ET/ModernWpf.resources.dll": {
+            "locale": "am-ET"
+          },
+          "lib/net5.0-windows7.0/ar-SA/ModernWpf.Controls.resources.dll": {
+            "locale": "ar-SA"
+          },
+          "lib/net5.0-windows7.0/ar-SA/ModernWpf.resources.dll": {
+            "locale": "ar-SA"
+          },
+          "lib/net5.0-windows7.0/az-Latn-AZ/ModernWpf.Controls.resources.dll": {
+            "locale": "az-Latn-AZ"
+          },
+          "lib/net5.0-windows7.0/az-Latn-AZ/ModernWpf.resources.dll": {
+            "locale": "az-Latn-AZ"
+          },
+          "lib/net5.0-windows7.0/be-BY/ModernWpf.Controls.resources.dll": {
+            "locale": "be-BY"
+          },
+          "lib/net5.0-windows7.0/be-BY/ModernWpf.resources.dll": {
+            "locale": "be-BY"
+          },
+          "lib/net5.0-windows7.0/bg-BG/ModernWpf.Controls.resources.dll": {
+            "locale": "bg-BG"
+          },
+          "lib/net5.0-windows7.0/bg-BG/ModernWpf.resources.dll": {
+            "locale": "bg-BG"
+          },
+          "lib/net5.0-windows7.0/bn-BD/ModernWpf.Controls.resources.dll": {
+            "locale": "bn-BD"
+          },
+          "lib/net5.0-windows7.0/bn-BD/ModernWpf.resources.dll": {
+            "locale": "bn-BD"
+          },
+          "lib/net5.0-windows7.0/bs-Latn-BA/ModernWpf.Controls.resources.dll": {
+            "locale": "bs-Latn-BA"
+          },
+          "lib/net5.0-windows7.0/bs-Latn-BA/ModernWpf.resources.dll": {
+            "locale": "bs-Latn-BA"
+          },
+          "lib/net5.0-windows7.0/ca-ES/ModernWpf.Controls.resources.dll": {
+            "locale": "ca-ES"
+          },
+          "lib/net5.0-windows7.0/ca-ES/ModernWpf.resources.dll": {
+            "locale": "ca-ES"
+          },
+          "lib/net5.0-windows7.0/cs-CZ/ModernWpf.Controls.resources.dll": {
+            "locale": "cs-CZ"
+          },
+          "lib/net5.0-windows7.0/cs-CZ/ModernWpf.resources.dll": {
+            "locale": "cs-CZ"
+          },
+          "lib/net5.0-windows7.0/da-DK/ModernWpf.Controls.resources.dll": {
+            "locale": "da-DK"
+          },
+          "lib/net5.0-windows7.0/da-DK/ModernWpf.resources.dll": {
+            "locale": "da-DK"
+          },
+          "lib/net5.0-windows7.0/de-DE/ModernWpf.Controls.resources.dll": {
+            "locale": "de-DE"
+          },
+          "lib/net5.0-windows7.0/de-DE/ModernWpf.resources.dll": {
+            "locale": "de-DE"
+          },
+          "lib/net5.0-windows7.0/el-GR/ModernWpf.Controls.resources.dll": {
+            "locale": "el-GR"
+          },
+          "lib/net5.0-windows7.0/el-GR/ModernWpf.resources.dll": {
+            "locale": "el-GR"
+          },
+          "lib/net5.0-windows7.0/en-GB/ModernWpf.Controls.resources.dll": {
+            "locale": "en-GB"
+          },
+          "lib/net5.0-windows7.0/en-GB/ModernWpf.resources.dll": {
+            "locale": "en-GB"
+          },
+          "lib/net5.0-windows7.0/es-ES/ModernWpf.Controls.resources.dll": {
+            "locale": "es-ES"
+          },
+          "lib/net5.0-windows7.0/es-ES/ModernWpf.resources.dll": {
+            "locale": "es-ES"
+          },
+          "lib/net5.0-windows7.0/es-MX/ModernWpf.Controls.resources.dll": {
+            "locale": "es-MX"
+          },
+          "lib/net5.0-windows7.0/es-MX/ModernWpf.resources.dll": {
+            "locale": "es-MX"
+          },
+          "lib/net5.0-windows7.0/et-EE/ModernWpf.Controls.resources.dll": {
+            "locale": "et-EE"
+          },
+          "lib/net5.0-windows7.0/et-EE/ModernWpf.resources.dll": {
+            "locale": "et-EE"
+          },
+          "lib/net5.0-windows7.0/eu-ES/ModernWpf.Controls.resources.dll": {
+            "locale": "eu-ES"
+          },
+          "lib/net5.0-windows7.0/eu-ES/ModernWpf.resources.dll": {
+            "locale": "eu-ES"
+          },
+          "lib/net5.0-windows7.0/fa-IR/ModernWpf.Controls.resources.dll": {
+            "locale": "fa-IR"
+          },
+          "lib/net5.0-windows7.0/fa-IR/ModernWpf.resources.dll": {
+            "locale": "fa-IR"
+          },
+          "lib/net5.0-windows7.0/fi-FI/ModernWpf.Controls.resources.dll": {
+            "locale": "fi-FI"
+          },
+          "lib/net5.0-windows7.0/fi-FI/ModernWpf.resources.dll": {
+            "locale": "fi-FI"
+          },
+          "lib/net5.0-windows7.0/fil-PH/ModernWpf.Controls.resources.dll": {
+            "locale": "fil-PH"
+          },
+          "lib/net5.0-windows7.0/fil-PH/ModernWpf.resources.dll": {
+            "locale": "fil-PH"
+          },
+          "lib/net5.0-windows7.0/fr-CA/ModernWpf.Controls.resources.dll": {
+            "locale": "fr-CA"
+          },
+          "lib/net5.0-windows7.0/fr-CA/ModernWpf.resources.dll": {
+            "locale": "fr-CA"
+          },
+          "lib/net5.0-windows7.0/fr-FR/ModernWpf.Controls.resources.dll": {
+            "locale": "fr-FR"
+          },
+          "lib/net5.0-windows7.0/fr-FR/ModernWpf.resources.dll": {
+            "locale": "fr-FR"
+          },
+          "lib/net5.0-windows7.0/gl-ES/ModernWpf.Controls.resources.dll": {
+            "locale": "gl-ES"
+          },
+          "lib/net5.0-windows7.0/gl-ES/ModernWpf.resources.dll": {
+            "locale": "gl-ES"
+          },
+          "lib/net5.0-windows7.0/he-IL/ModernWpf.Controls.resources.dll": {
+            "locale": "he-IL"
+          },
+          "lib/net5.0-windows7.0/he-IL/ModernWpf.resources.dll": {
+            "locale": "he-IL"
+          },
+          "lib/net5.0-windows7.0/hi-IN/ModernWpf.Controls.resources.dll": {
+            "locale": "hi-IN"
+          },
+          "lib/net5.0-windows7.0/hi-IN/ModernWpf.resources.dll": {
+            "locale": "hi-IN"
+          },
+          "lib/net5.0-windows7.0/hr-HR/ModernWpf.Controls.resources.dll": {
+            "locale": "hr-HR"
+          },
+          "lib/net5.0-windows7.0/hr-HR/ModernWpf.resources.dll": {
+            "locale": "hr-HR"
+          },
+          "lib/net5.0-windows7.0/hu-HU/ModernWpf.Controls.resources.dll": {
+            "locale": "hu-HU"
+          },
+          "lib/net5.0-windows7.0/hu-HU/ModernWpf.resources.dll": {
+            "locale": "hu-HU"
+          },
+          "lib/net5.0-windows7.0/id-ID/ModernWpf.Controls.resources.dll": {
+            "locale": "id-ID"
+          },
+          "lib/net5.0-windows7.0/id-ID/ModernWpf.resources.dll": {
+            "locale": "id-ID"
+          },
+          "lib/net5.0-windows7.0/is-IS/ModernWpf.Controls.resources.dll": {
+            "locale": "is-IS"
+          },
+          "lib/net5.0-windows7.0/is-IS/ModernWpf.resources.dll": {
+            "locale": "is-IS"
+          },
+          "lib/net5.0-windows7.0/it-IT/ModernWpf.Controls.resources.dll": {
+            "locale": "it-IT"
+          },
+          "lib/net5.0-windows7.0/it-IT/ModernWpf.resources.dll": {
+            "locale": "it-IT"
+          },
+          "lib/net5.0-windows7.0/ja-JP/ModernWpf.Controls.resources.dll": {
+            "locale": "ja-JP"
+          },
+          "lib/net5.0-windows7.0/ja-JP/ModernWpf.resources.dll": {
+            "locale": "ja-JP"
+          },
+          "lib/net5.0-windows7.0/ka-GE/ModernWpf.Controls.resources.dll": {
+            "locale": "ka-GE"
+          },
+          "lib/net5.0-windows7.0/ka-GE/ModernWpf.resources.dll": {
+            "locale": "ka-GE"
+          },
+          "lib/net5.0-windows7.0/kk-KZ/ModernWpf.Controls.resources.dll": {
+            "locale": "kk-KZ"
+          },
+          "lib/net5.0-windows7.0/kk-KZ/ModernWpf.resources.dll": {
+            "locale": "kk-KZ"
+          },
+          "lib/net5.0-windows7.0/km-KH/ModernWpf.Controls.resources.dll": {
+            "locale": "km-KH"
+          },
+          "lib/net5.0-windows7.0/km-KH/ModernWpf.resources.dll": {
+            "locale": "km-KH"
+          },
+          "lib/net5.0-windows7.0/kn-IN/ModernWpf.Controls.resources.dll": {
+            "locale": "kn-IN"
+          },
+          "lib/net5.0-windows7.0/kn-IN/ModernWpf.resources.dll": {
+            "locale": "kn-IN"
+          },
+          "lib/net5.0-windows7.0/ko-KR/ModernWpf.Controls.resources.dll": {
+            "locale": "ko-KR"
+          },
+          "lib/net5.0-windows7.0/ko-KR/ModernWpf.resources.dll": {
+            "locale": "ko-KR"
+          },
+          "lib/net5.0-windows7.0/lo-LA/ModernWpf.Controls.resources.dll": {
+            "locale": "lo-LA"
+          },
+          "lib/net5.0-windows7.0/lo-LA/ModernWpf.resources.dll": {
+            "locale": "lo-LA"
+          },
+          "lib/net5.0-windows7.0/lt-LT/ModernWpf.Controls.resources.dll": {
+            "locale": "lt-LT"
+          },
+          "lib/net5.0-windows7.0/lt-LT/ModernWpf.resources.dll": {
+            "locale": "lt-LT"
+          },
+          "lib/net5.0-windows7.0/lv-LV/ModernWpf.Controls.resources.dll": {
+            "locale": "lv-LV"
+          },
+          "lib/net5.0-windows7.0/lv-LV/ModernWpf.resources.dll": {
+            "locale": "lv-LV"
+          },
+          "lib/net5.0-windows7.0/mk-MK/ModernWpf.Controls.resources.dll": {
+            "locale": "mk-MK"
+          },
+          "lib/net5.0-windows7.0/mk-MK/ModernWpf.resources.dll": {
+            "locale": "mk-MK"
+          },
+          "lib/net5.0-windows7.0/ml-IN/ModernWpf.Controls.resources.dll": {
+            "locale": "ml-IN"
+          },
+          "lib/net5.0-windows7.0/ml-IN/ModernWpf.resources.dll": {
+            "locale": "ml-IN"
+          },
+          "lib/net5.0-windows7.0/ms-MY/ModernWpf.Controls.resources.dll": {
+            "locale": "ms-MY"
+          },
+          "lib/net5.0-windows7.0/ms-MY/ModernWpf.resources.dll": {
+            "locale": "ms-MY"
+          },
+          "lib/net5.0-windows7.0/nb-NO/ModernWpf.Controls.resources.dll": {
+            "locale": "nb-NO"
+          },
+          "lib/net5.0-windows7.0/nb-NO/ModernWpf.resources.dll": {
+            "locale": "nb-NO"
+          },
+          "lib/net5.0-windows7.0/nl-NL/ModernWpf.Controls.resources.dll": {
+            "locale": "nl-NL"
+          },
+          "lib/net5.0-windows7.0/nl-NL/ModernWpf.resources.dll": {
+            "locale": "nl-NL"
+          },
+          "lib/net5.0-windows7.0/nn-NO/ModernWpf.Controls.resources.dll": {
+            "locale": "nn-NO"
+          },
+          "lib/net5.0-windows7.0/nn-NO/ModernWpf.resources.dll": {
+            "locale": "nn-NO"
+          },
+          "lib/net5.0-windows7.0/pl-PL/ModernWpf.Controls.resources.dll": {
+            "locale": "pl-PL"
+          },
+          "lib/net5.0-windows7.0/pl-PL/ModernWpf.resources.dll": {
+            "locale": "pl-PL"
+          },
+          "lib/net5.0-windows7.0/pt-BR/ModernWpf.Controls.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/net5.0-windows7.0/pt-BR/ModernWpf.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/net5.0-windows7.0/pt-PT/ModernWpf.Controls.resources.dll": {
+            "locale": "pt-PT"
+          },
+          "lib/net5.0-windows7.0/pt-PT/ModernWpf.resources.dll": {
+            "locale": "pt-PT"
+          },
+          "lib/net5.0-windows7.0/ro-RO/ModernWpf.Controls.resources.dll": {
+            "locale": "ro-RO"
+          },
+          "lib/net5.0-windows7.0/ro-RO/ModernWpf.resources.dll": {
+            "locale": "ro-RO"
+          },
+          "lib/net5.0-windows7.0/ru-RU/ModernWpf.Controls.resources.dll": {
+            "locale": "ru-RU"
+          },
+          "lib/net5.0-windows7.0/ru-RU/ModernWpf.resources.dll": {
+            "locale": "ru-RU"
+          },
+          "lib/net5.0-windows7.0/sk-SK/ModernWpf.Controls.resources.dll": {
+            "locale": "sk-SK"
+          },
+          "lib/net5.0-windows7.0/sk-SK/ModernWpf.resources.dll": {
+            "locale": "sk-SK"
+          },
+          "lib/net5.0-windows7.0/sl-SI/ModernWpf.Controls.resources.dll": {
+            "locale": "sl-SI"
+          },
+          "lib/net5.0-windows7.0/sl-SI/ModernWpf.resources.dll": {
+            "locale": "sl-SI"
+          },
+          "lib/net5.0-windows7.0/sq-AL/ModernWpf.Controls.resources.dll": {
+            "locale": "sq-AL"
+          },
+          "lib/net5.0-windows7.0/sq-AL/ModernWpf.resources.dll": {
+            "locale": "sq-AL"
+          },
+          "lib/net5.0-windows7.0/sr-Latn-RS/ModernWpf.Controls.resources.dll": {
+            "locale": "sr-Latn-RS"
+          },
+          "lib/net5.0-windows7.0/sr-Latn-RS/ModernWpf.resources.dll": {
+            "locale": "sr-Latn-RS"
+          },
+          "lib/net5.0-windows7.0/sv-SE/ModernWpf.Controls.resources.dll": {
+            "locale": "sv-SE"
+          },
+          "lib/net5.0-windows7.0/sv-SE/ModernWpf.resources.dll": {
+            "locale": "sv-SE"
+          },
+          "lib/net5.0-windows7.0/sw-KE/ModernWpf.Controls.resources.dll": {
+            "locale": "sw-KE"
+          },
+          "lib/net5.0-windows7.0/sw-KE/ModernWpf.resources.dll": {
+            "locale": "sw-KE"
+          },
+          "lib/net5.0-windows7.0/ta-IN/ModernWpf.Controls.resources.dll": {
+            "locale": "ta-IN"
+          },
+          "lib/net5.0-windows7.0/ta-IN/ModernWpf.resources.dll": {
+            "locale": "ta-IN"
+          },
+          "lib/net5.0-windows7.0/te-IN/ModernWpf.Controls.resources.dll": {
+            "locale": "te-IN"
+          },
+          "lib/net5.0-windows7.0/te-IN/ModernWpf.resources.dll": {
+            "locale": "te-IN"
+          },
+          "lib/net5.0-windows7.0/th-TH/ModernWpf.Controls.resources.dll": {
+            "locale": "th-TH"
+          },
+          "lib/net5.0-windows7.0/th-TH/ModernWpf.resources.dll": {
+            "locale": "th-TH"
+          },
+          "lib/net5.0-windows7.0/tr-TR/ModernWpf.Controls.resources.dll": {
+            "locale": "tr-TR"
+          },
+          "lib/net5.0-windows7.0/tr-TR/ModernWpf.resources.dll": {
+            "locale": "tr-TR"
+          },
+          "lib/net5.0-windows7.0/uk-UA/ModernWpf.Controls.resources.dll": {
+            "locale": "uk-UA"
+          },
+          "lib/net5.0-windows7.0/uk-UA/ModernWpf.resources.dll": {
+            "locale": "uk-UA"
+          },
+          "lib/net5.0-windows7.0/uz-Latn-UZ/ModernWpf.Controls.resources.dll": {
+            "locale": "uz-Latn-UZ"
+          },
+          "lib/net5.0-windows7.0/uz-Latn-UZ/ModernWpf.resources.dll": {
+            "locale": "uz-Latn-UZ"
+          },
+          "lib/net5.0-windows7.0/vi-VN/ModernWpf.Controls.resources.dll": {
+            "locale": "vi-VN"
+          },
+          "lib/net5.0-windows7.0/vi-VN/ModernWpf.resources.dll": {
+            "locale": "vi-VN"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.4": {
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.4.30916"
+          }
+        }
+      },
+      "OpenCvSharp4/4.11.0.20250507": {
+        "dependencies": {
+          "System.Memory": "4.6.3"
+        },
+        "runtime": {
+          "lib/net6.0/OpenCvSharp.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "OpenCvSharp4.runtime.win/4.11.0.20250507": {
+        "runtimeTargets": {
+          "runtimes/win-x64/native/OpenCvSharpExtern.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "2024.12.0.0"
+          },
+          "runtimes/win-x86/native/OpenCvSharpExtern.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/opencv_videoio_ffmpeg4110.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "2024.12.0.0"
+          }
+        }
+      },
+      "OpenCvSharp4.WpfExtensions/4.11.0.20250507": {
+        "dependencies": {
+          "OpenCvSharp4": "4.11.0.20250507",
+          "System.Drawing.Common": "8.0.11"
+        },
+        "runtime": {
+          "lib/net6.0/OpenCvSharp.WpfExtensions.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp/2.88.9": {
+        "dependencies": {
+          "SkiaSharp.NativeAssets.Win32": "2.88.9",
+          "SkiaSharp.NativeAssets.macOS": "2.88.9"
+        },
+        "runtime": {
+          "lib/net6.0/SkiaSharp.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.9.0"
+          }
+        }
+      },
+      "SkiaSharp.HarfBuzz/2.88.9": {
+        "dependencies": {
+          "HarfBuzzSharp": "7.3.0.3",
+          "SkiaSharp": "2.88.9"
+        },
+        "runtime": {
+          "lib/net6.0/SkiaSharp.HarfBuzz.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.9.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.macOS/2.88.9": {
+        "runtimeTargets": {
+          "runtimes/osx/native/libSkiaSharp.dylib": {
+            "rid": "osx",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.NativeAssets.WebAssembly/2.88.9": {},
+      "SkiaSharp.NativeAssets.Win32/2.88.9": {
+        "runtimeTargets": {
+          "runtimes/win-arm64/native/libSkiaSharp.dll": {
+            "rid": "win-arm64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libSkiaSharp.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libSkiaSharp.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "SkiaSharp.Views.Uno.WinUI/2.88.9": {
+        "dependencies": {
+          "SkiaSharp": "2.88.9",
+          "SkiaSharp.NativeAssets.WebAssembly": "2.88.9",
+          "Uno.WinUI": "6.0.465"
+        },
+        "runtime": {
+          "lib/net7.0/SkiaSharp.Views.Windows.dll": {
+            "assemblyVersion": "2.88.0.0",
+            "fileVersion": "2.88.9.0"
+          }
+        }
+      },
+      "System.Collections/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Collections.Immutable/1.3.1": {
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.Linq": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Threading": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.0/System.Collections.Immutable.dll": {
+            "assemblyVersion": "1.2.1.0",
+            "fileVersion": "4.6.24816.1"
+          }
+        }
+      },
+      "System.Diagnostics.Debug/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Drawing.Common/8.0.11": {
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "8.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/System.Drawing.Common.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.1124.52103"
+          }
+        }
+      },
+      "System.Globalization/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.IO/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0",
+          "System.Text.Encoding": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
+        }
+      },
+      "System.Linq/4.3.0": {
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Resources.ResourceManager": "4.3.0",
+          "System.Runtime": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.6/System.Linq.dll": {
+            "assemblyVersion": "4.1.1.0",
+            "fileVersion": "4.6.24705.1"
+          }
+        }
+      },
+      "System.Memory/4.6.3": {},
+      "System.Numerics.Tensors/9.0.0": {
+        "runtime": {
+          "lib/net8.0/System.Numerics.Tensors.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52809"
+          }
+        }
+      },
+      "System.Numerics.Vectors/4.5.0": {},
+      "System.Reflection/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.IO": "4.3.0",
+          "System.Reflection.Primitives": "4.3.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Reflection.Primitives/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Resources.ResourceManager/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Globalization": "4.3.0",
+          "System.Reflection": "4.3.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Runtime/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0"
+        }
+      },
+      "System.Runtime.Extensions/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Runtime.InteropServices.WindowsRuntime/4.3.0": {
+        "dependencies": {
+          "System.Runtime": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.3/System.Runtime.InteropServices.WindowsRuntime.dll": {
+            "assemblyVersion": "4.0.2.0",
+            "fileVersion": "4.6.24705.1"
+          }
+        }
+      },
+      "System.Text.Encoding/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "System.Threading/4.3.0": {
+        "dependencies": {
+          "System.Runtime": "4.3.0",
+          "System.Threading.Tasks": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.3/System.Threading.dll": {
+            "assemblyVersion": "4.0.12.0",
+            "fileVersion": "4.6.24705.1"
+          }
+        }
+      },
+      "System.Threading.Tasks/4.3.0": {
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0",
+          "Microsoft.NETCore.Targets": "1.1.0",
+          "System.Runtime": "4.3.0"
+        }
+      },
+      "Uno.Diagnostics.Eventing/2.0.1": {
+        "runtime": {
+          "lib/net5.0/Uno.Diagnostics.Eventing.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          }
+        }
+      },
+      "Uno.Fonts.Fluent/2.6.1": {
+        "runtime": {
+          "lib/netstandard1.0/Uno.Fonts.Fluent.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Uno.Foundation/6.0.465": {
+        "runtime": {
+          "lib/net8.0/Uno.Foundation.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          }
+        }
+      },
+      "Uno.Foundation.Logging/6.0.465": {
+        "runtime": {
+          "lib/net8.0/Uno.Foundation.Logging.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          }
+        }
+      },
+      "Uno.WinRT/6.0.465": {
+        "dependencies": {
+          "Uno.Foundation": "6.0.465"
+        },
+        "runtime": {
+          "lib/net8.0/Uno.UI.Dispatching.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          }
+        }
+      },
+      "Uno.WinUI/6.0.465": {
+        "dependencies": {
+          "System.Collections.Immutable": "1.3.1",
+          "System.Memory": "4.6.3",
+          "System.Numerics.Vectors": "4.5.0",
+          "System.Runtime.InteropServices.WindowsRuntime": "4.3.0",
+          "Uno.Diagnostics.Eventing": "2.0.1",
+          "Uno.Fonts.Fluent": "2.6.1",
+          "Uno.Foundation.Logging": "6.0.465",
+          "Uno.WinRT": "6.0.465"
+        },
+        "runtime": {
+          "lib/net8.0/Uno.UI.Composition.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.UI.FluentTheme.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.UI.FluentTheme.v1.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.UI.FluentTheme.v2.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.UI.Toolkit.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.UI.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          },
+          "lib/net8.0/Uno.Xaml.dll": {
+            "assemblyVersion": "255.255.255.255",
+            "fileVersion": "255.255.255.255"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AForge/2.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-clkumhM9DggqIzEXAHgVLeWO4arG5YfoPr7J4jfjJx35AoeEIJSSm49J25bwp/9mXQYLwi7y1Wunc8qgYJsGxg==",
+      "path": "aforge/2.2.5",
+      "hashPath": "aforge.2.2.5.nupkg.sha512"
+    },
+    "AForge.Imaging/2.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-n8l7Zdsm89EFW9Uz4uCO3D428Gu4Q56YxixSMJPruen1c30R8R9Mm8AreTdoOi2XjN5id04JwFFlXYTk8pIIfw==",
+      "path": "aforge.imaging/2.2.5",
+      "hashPath": "aforge.imaging.2.2.5.nupkg.sha512"
+    },
+    "AForge.Math/2.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pmT1WobVv13vMxwXhCu8sRunxjiUHyURWS0+dsW/aBPi06xiyYIdCLHI6jph9Axb4QoLIlb85eBI6zd2EAbGIg==",
+      "path": "aforge.math/2.2.5",
+      "hashPath": "aforge.math.2.2.5.nupkg.sha512"
+    },
+    "AForge.Video/2.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-XqzcOXtBUagEPRqg/00oayxlCPmxP4284SdM62mVotsNoD03fs19BrzdMBfhUOOYPyd0B/IXH7tEWnSDmc2gxA==",
+      "path": "aforge.video/2.2.5",
+      "hashPath": "aforge.video.2.2.5.nupkg.sha512"
+    },
+    "AForge.Video.DirectShow/2.2.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pEch6felU/RGAbl0A7yjaQjsGxwiRFU9R+qBqR92wQo++XhzPLeQaZHnAPIBYaG7MfoqtjgCDkK4z3Tra4VQ3w==",
+      "path": "aforge.video.directshow/2.2.5",
+      "hashPath": "aforge.video.directshow.2.2.5.nupkg.sha512"
+    },
+    "CSharpMarkup.WinUI/3.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SDAp3a1O1BJJqzrp/bvLoDhIBYsaw+DCv2mW6OMfOJItMR9JK2YK0fUKwr6XCPqug1KGMcjFTW8t4FLWc2omxg==",
+      "path": "csharpmarkup.winui/3.1.2",
+      "hashPath": "csharpmarkup.winui.3.1.2.nupkg.sha512"
+    },
+    "CSharpMarkup.WinUI.LiveChartsCore.SkiaSharpView/3.1.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HATSQmLzz8tu5CGCy5qeHr+g0pRkp5GeZ4EzVyf8buS+wAy5ByQrLUxQjjh7pKi82VmWvLcoROLLOTBF1WpLqg==",
+      "path": "csharpmarkup.winui.livechartscore.skiasharpview/3.1.2",
+      "hashPath": "csharpmarkup.winui.livechartscore.skiasharpview.3.1.2.nupkg.sha512"
+    },
+    "EasyModbusTCP/5.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-2a5a9smmIu0Tq5zdwMvgO+WDvUgH0JuNv/crAILrDKcNRb8P/AOx9PEyegBiMn1TGXLP3byu0zhsSSUrrVyyXw==",
+      "path": "easymodbustcp/5.6.0",
+      "hashPath": "easymodbustcp.5.6.0.nupkg.sha512"
+    },
+    "FontAwesome.WPF/4.7.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SXE080rnyWMm9Dt0BZzMxh89/o9teuSaqL1N+0O/XM/F/HU8JuZA4XaEKxjBigwZPHHU3/udTa0QMYCHkmH43Q==",
+      "path": "fontawesome.wpf/4.7.0.9",
+      "hashPath": "fontawesome.wpf.4.7.0.9.nupkg.sha512"
+    },
+    "HarfBuzzSharp/7.3.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Hq+5+gx10coOvuRgB13KBwiWxJq1QeYuhtVLbA01ZCWaugOnolUahF44KvrQTUUHDNk/C7HB6SMaebsZeOdhgg==",
+      "path": "harfbuzzsharp/7.3.0.3",
+      "hashPath": "harfbuzzsharp.7.3.0.3.nupkg.sha512"
+    },
+    "HarfBuzzSharp.NativeAssets.macOS/7.3.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UAwIYnkbBTzBJv1Id8FijY/i8QiIepRemSXufU8fyzwWhYJdx4+ajG8yQUie5HW/uusbVLFSr26muSlJOFDgSw==",
+      "path": "harfbuzzsharp.nativeassets.macos/7.3.0.3",
+      "hashPath": "harfbuzzsharp.nativeassets.macos.7.3.0.3.nupkg.sha512"
+    },
+    "HarfBuzzSharp.NativeAssets.Win32/7.3.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RPxRXD16KtSs8Yxr2RK9Qs7AwyN9MlpqZIYs0AvfaJwl7RAtVhC0+u2f2SKwX0uMYYd3O98Z+OBA1sj6aWVKQA==",
+      "path": "harfbuzzsharp.nativeassets.win32/7.3.0.3",
+      "hashPath": "harfbuzzsharp.nativeassets.win32.7.3.0.3.nupkg.sha512"
+    },
+    "LiveChartsCore/2.0.0-rc5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HirzXpe1jP7iv1ueLZl6nRtxqdlvN9qRLNNuc3T9RlGGrXokaFWj2wSGYTDZINnDXdbb6QxhZFt1aAavBcKlVw==",
+      "path": "livechartscore/2.0.0-rc5.3",
+      "hashPath": "livechartscore.2.0.0-rc5.3.nupkg.sha512"
+    },
+    "LiveChartsCore.Behaviours/2.0.0-rc5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-J5wnb8yyIB+UTHYoj1+cuoHmgatNtjW5sPgCUyHx4D3MRkZTjC8dHNGksXbn4ydJOTo9j+pceZKwv6THmjiZng==",
+      "path": "livechartscore.behaviours/2.0.0-rc5.3",
+      "hashPath": "livechartscore.behaviours.2.0.0-rc5.3.nupkg.sha512"
+    },
+    "LiveChartsCore.SkiaSharpView/2.0.0-rc5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-UZUNBShABAJQKIV2Rb7KhKcyYtTp0MjLf0fatRV1vmDDwiCOFWd9xO5jeVlOlnTJt938EGZzz4j1lKJjjtYAzw==",
+      "path": "livechartscore.skiasharpview/2.0.0-rc5.3",
+      "hashPath": "livechartscore.skiasharpview.2.0.0-rc5.3.nupkg.sha512"
+    },
+    "LiveChartsCore.SkiaSharpView.Uno.WinUI/2.0.0-rc5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+ng1hwXbPzNYZA8nZ67BYAyJLu9ScdRT4G6rTMLnMAYxiD4jaTwgE6FvUuXGNTvb/oq97FVxlYyYO01DrcCR9g==",
+      "path": "livechartscore.skiasharpview.uno.winui/2.0.0-rc5.3",
+      "hashPath": "livechartscore.skiasharpview.uno.winui.2.0.0-rc5.3.nupkg.sha512"
+    },
+    "Microsoft.ML.OnnxRuntime/1.22.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-oKRyzajMIB18Z9gmC9CyDPgyo5Yu/ZYZ/w3mF6NwqC0YHOZisGytdAaK3fvUFLZ5XDRZTDzzr+Nqx/clRtdCcA==",
+      "path": "microsoft.ml.onnxruntime/1.22.1",
+      "hashPath": "microsoft.ml.onnxruntime.1.22.1.nupkg.sha512"
+    },
+    "Microsoft.ML.OnnxRuntime.Managed/1.22.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-hYGYf0BaHiTfb623kD36pYpFN0rh2Znk3QS+ZWWxnTV6iDzl1KUJYaxf7/stz28r1w6HOqUqgWcT1nOYXuf8ew==",
+      "path": "microsoft.ml.onnxruntime.managed/1.22.1",
+      "hashPath": "microsoft.ml.onnxruntime.managed.1.22.1.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Platforms/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "path": "microsoft.netcore.platforms/1.1.0",
+      "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
+    },
+    "Microsoft.NETCore.Targets/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-aOZA3BWfz9RXjpzt0sRJJMjAscAUm3Hoa4UWAfceV9UTYxgwZ1lZt5nO2myFf+/jetYQo4uTP7zS8sJY67BBxg==",
+      "path": "microsoft.netcore.targets/1.1.0",
+      "hashPath": "microsoft.netcore.targets.1.1.0.nupkg.sha512"
+    },
+    "Microsoft.Win32.SystemEvents/8.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw==",
+      "path": "microsoft.win32.systemevents/8.0.0",
+      "hashPath": "microsoft.win32.systemevents.8.0.0.nupkg.sha512"
+    },
+    "ModernWpfUI/0.9.6": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-eWe90HciyudQQtZVbZ9QFssS74BwK69W7cBd52AEZHmrsS4hrSA+/BpUbAFWzzFDH6FBE1xsHPiRC+wHS7xgJw==",
+      "path": "modernwpfui/0.9.6",
+      "hashPath": "modernwpfui.0.9.6.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A==",
+      "path": "newtonsoft.json/13.0.4",
+      "hashPath": "newtonsoft.json.13.0.4.nupkg.sha512"
+    },
+    "OpenCvSharp4/4.11.0.20250507": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-j/R+G6xGC5IV2wGRU0/GF5qG/FrP+Uxp8dmNnXFlIdiw8Gfo4mtvKcBOBfS/bn4pP/7FNHLFX/xvMtgPJeDjAA==",
+      "path": "opencvsharp4/4.11.0.20250507",
+      "hashPath": "opencvsharp4.4.11.0.20250507.nupkg.sha512"
+    },
+    "OpenCvSharp4.runtime.win/4.11.0.20250507": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3PxMXyzR+pkL9UOx2PiBjZm+/iyCIu5D6OlA1sq9MH7oWrfvVnCXJlUYhIJv67F7SLUwUuGwXDIQBfdsL/54lg==",
+      "path": "opencvsharp4.runtime.win/4.11.0.20250507",
+      "hashPath": "opencvsharp4.runtime.win.4.11.0.20250507.nupkg.sha512"
+    },
+    "OpenCvSharp4.WpfExtensions/4.11.0.20250507": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MU5V7bULZcGFPjHnOBw1VLwlVKSuEqCPpCP2JAYj/m7bD8ZWNWB1jFNW2OjnonCF01imcTJyeESO7ZDSxDmq8g==",
+      "path": "opencvsharp4.wpfextensions/4.11.0.20250507",
+      "hashPath": "opencvsharp4.wpfextensions.4.11.0.20250507.nupkg.sha512"
+    },
+    "SkiaSharp/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3MD5VHjXXieSHCleRLuaTXmL2pD0mB7CcOB1x2kA1I4bhptf4e3R27iM93264ZYuAq6mkUyX5XbcxnZvMJYc1Q==",
+      "path": "skiasharp/2.88.9",
+      "hashPath": "skiasharp.2.88.9.nupkg.sha512"
+    },
+    "SkiaSharp.HarfBuzz/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5lyjX04CSWTKFYMSNN6SMupV2qzYDr8W/u8S3ZEkr+Sg3kOi0YE06EOqG0tzn/YPBID89xam4L3rz3hUUKOGEQ==",
+      "path": "skiasharp.harfbuzz/2.88.9",
+      "hashPath": "skiasharp.harfbuzz.2.88.9.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.macOS/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Nv5spmKc4505Ep7oUoJ5vp3KweFpeNqxpyGDWyeEPTX2uR6S6syXIm3gj75dM0YJz7NPvcix48mR5laqs8dPuA==",
+      "path": "skiasharp.nativeassets.macos/2.88.9",
+      "hashPath": "skiasharp.nativeassets.macos.2.88.9.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.WebAssembly/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kt06RccBHSnAs2wDYdBSfsjIDbY3EpsOVqnlDgKdgvyuRA8ZFDaHRdWNx1VHjGgYzmnFCGiTJBnXFl5BqGwGnA==",
+      "path": "skiasharp.nativeassets.webassembly/2.88.9",
+      "hashPath": "skiasharp.nativeassets.webassembly.2.88.9.nupkg.sha512"
+    },
+    "SkiaSharp.NativeAssets.Win32/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-wb2kYgU7iy84nQLYZwMeJXixvK++GoIuECjU4ECaUKNuflyRlJKyiRhN1MAHswvlvzuvkrjRWlK0Za6+kYQK7w==",
+      "path": "skiasharp.nativeassets.win32/2.88.9",
+      "hashPath": "skiasharp.nativeassets.win32.2.88.9.nupkg.sha512"
+    },
+    "SkiaSharp.Views.Uno.WinUI/2.88.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ScHWyv/kJuNWUmaXfYqz1ik/qRTazJg5+hNSWTV/2L33r5UVyC+aRCHr8tjhecAxL593+6ECe4FqQwqbxinKSg==",
+      "path": "skiasharp.views.uno.winui/2.88.9",
+      "hashPath": "skiasharp.views.uno.winui.2.88.9.nupkg.sha512"
+    },
+    "System.Collections/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3Dcj85/TBdVpL5Zr+gEEBUuFe2icOnLalmEh9hfck1PTYbbyWuZgh4fmm2ysCLTrqLQw6t3TgTyJ+VLp+Qb+Lw==",
+      "path": "system.collections/4.3.0",
+      "hashPath": "system.collections.4.3.0.nupkg.sha512"
+    },
+    "System.Collections.Immutable/1.3.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-n+AGX7zmiZumW9aggOkXaHzUeAS3EfeTErnkKCusyONUozbTv+kMb8VE36m+ldV6kF9g57G2c641KCdgH9E0pg==",
+      "path": "system.collections.immutable/1.3.1",
+      "hashPath": "system.collections.immutable.1.3.1.nupkg.sha512"
+    },
+    "System.Diagnostics.Debug/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZUhUOdqmaG5Jk3Xdb8xi5kIyQYAA4PnTNlHx1mu9ZY3qv4ELIdKbnL/akbGaKi2RnNUWaZsAs31rvzFdewTj2g==",
+      "path": "system.diagnostics.debug/4.3.0",
+      "hashPath": "system.diagnostics.debug.4.3.0.nupkg.sha512"
+    },
+    "System.Drawing.Common/8.0.11": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AVyutHHKrX0Mt9C9T8W3Ccat3cVauUwvN+EqnVpSQi92nwBqoQ+2ZRvGP1S+rKK+6TGXmRflSYNShVjl2mMBlw==",
+      "path": "system.drawing.common/8.0.11",
+      "hashPath": "system.drawing.common.8.0.11.nupkg.sha512"
+    },
+    "System.Globalization/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-kYdVd2f2PAdFGblzFswE4hkNANJBKRmsfa2X5LG2AcWE1c7/4t0pYae1L8vfZ5xvE2nK/R9JprtToA61OSHWIg==",
+      "path": "system.globalization/4.3.0",
+      "hashPath": "system.globalization.4.3.0.nupkg.sha512"
+    },
+    "System.IO/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3qjaHvxQPDpSOYICjUoTsmoq5u6QJAFRUITgeT/4gqkF1bajbSmb1kwSxEA8AHlofqgcKJcM8udgieRNhaJ5Cg==",
+      "path": "system.io/4.3.0",
+      "hashPath": "system.io.4.3.0.nupkg.sha512"
+    },
+    "System.Linq/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5DbqIUpsDp0dFftytzuMmc0oeMdQwjcP/EWxsksIz/w1TcFRkZ3yKKz0PqiYFMmEwPSWw+qNVqD7PJ889JzHbw==",
+      "path": "system.linq/4.3.0",
+      "hashPath": "system.linq.4.3.0.nupkg.sha512"
+    },
+    "System.Memory/4.6.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qdcDOgnFZY40+Q9876JUHnlHu7bosOHX8XISRoH94fwk6hgaeQGSgfZd8srWRZNt5bV9ZW2TljcegDNxsf+96A==",
+      "path": "system.memory/4.6.3",
+      "hashPath": "system.memory.4.6.3.nupkg.sha512"
+    },
+    "System.Numerics.Tensors/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-hyJB4UlpAi19Xr9AXzu2NuagKC4lPfHObNMEAA0HmqFz2rX7wKgzeYzO/jM/eBHDhnUGFFEjk5cOoJaxqg5J4A==",
+      "path": "system.numerics.tensors/9.0.0",
+      "hashPath": "system.numerics.tensors.9.0.0.nupkg.sha512"
+    },
+    "System.Numerics.Vectors/4.5.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-QQTlPTl06J/iiDbJCiepZ4H//BVraReU4O4EoRw1U02H5TLUIT7xn3GnDp9AXPSlJUDyFs4uWjWafNX6WrAojQ==",
+      "path": "system.numerics.vectors/4.5.0",
+      "hashPath": "system.numerics.vectors.4.5.0.nupkg.sha512"
+    },
+    "System.Reflection/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-KMiAFoW7MfJGa9nDFNcfu+FpEdiHpWgTcS2HdMpDvt9saK3y/G4GwprPyzqjFH9NTaGPQeWNHU+iDlDILj96aQ==",
+      "path": "system.reflection/4.3.0",
+      "hashPath": "system.reflection.4.3.0.nupkg.sha512"
+    },
+    "System.Reflection.Primitives/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5RXItQz5As4xN2/YUDxdpsEkMhvw3e6aNveFXUn4Hl/udNTCNhnKp8lT9fnc3MhvGKh1baak5CovpuQUXHAlIA==",
+      "path": "system.reflection.primitives/4.3.0",
+      "hashPath": "system.reflection.primitives.4.3.0.nupkg.sha512"
+    },
+    "System.Resources.ResourceManager/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/zrcPkkWdZmI4F92gL/TPumP98AVDu/Wxr3CSJGQQ+XN6wbRZcyfSKVoPo17ilb3iOr0cCRqJInGwNMolqhS8A==",
+      "path": "system.resources.resourcemanager/4.3.0",
+      "hashPath": "system.resources.resourcemanager.4.3.0.nupkg.sha512"
+    },
+    "System.Runtime/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JufQi0vPQ0xGnAczR13AUFglDyVYt4Kqnz1AZaiKZ5+GICq0/1MH/mO/eAJHt/mHW1zjKBJd7kV26SrxddAhiw==",
+      "path": "system.runtime/4.3.0",
+      "hashPath": "system.runtime.4.3.0.nupkg.sha512"
+    },
+    "System.Runtime.Extensions/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-guW0uK0fn5fcJJ1tJVXYd7/1h5F+pea1r7FLSOz/f8vPEqbR2ZAknuRDvTQ8PzAilDveOxNjSfr0CHfIQfFk8g==",
+      "path": "system.runtime.extensions/4.3.0",
+      "hashPath": "system.runtime.extensions.4.3.0.nupkg.sha512"
+    },
+    "System.Runtime.InteropServices.WindowsRuntime/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-J4GUi3xZQLUBasNwZnjrffN8i5wpHrBtZoLG+OhRyGo/+YunMRWWtwoMDlUAIdmX0uRfpHIBDSV6zyr3yf00TA==",
+      "path": "system.runtime.interopservices.windowsruntime/4.3.0",
+      "hashPath": "system.runtime.interopservices.windowsruntime.4.3.0.nupkg.sha512"
+    },
+    "System.Text.Encoding/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BiIg+KWaSDOITze6jGQynxg64naAPtqGHBwDrLaCtixsa5bKiR8dpPOHA7ge3C0JJQizJE+sfkz1wV+BAKAYZw==",
+      "path": "system.text.encoding/4.3.0",
+      "hashPath": "system.text.encoding.4.3.0.nupkg.sha512"
+    },
+    "System.Threading/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VkUS0kOBcUf3Wwm0TSbrevDDZ6BlM+b/HRiapRFWjM5O0NS0LviG0glKmFK+hhPDd1XFeSdU1GmlLhb2CoVpIw==",
+      "path": "system.threading/4.3.0",
+      "hashPath": "system.threading.4.3.0.nupkg.sha512"
+    },
+    "System.Threading.Tasks/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LbSxKEdOUhVe8BezB/9uOGGppt+nZf6e1VFyw6v3DN6lqitm0OSn2uXMOdtP0M3W4iMcqcivm2J6UgqiwwnXiA==",
+      "path": "system.threading.tasks/4.3.0",
+      "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
+    },
+    "Uno.Diagnostics.Eventing/2.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Hd03em+Bga+w+ljCtiyc+713PQDtCB0Qkw3sBggvXXdDB2URwEc3N4TnM3vFeXpmHHZGM7dN7D8qxfiGoEEHzw==",
+      "path": "uno.diagnostics.eventing/2.0.1",
+      "hashPath": "uno.diagnostics.eventing.2.0.1.nupkg.sha512"
+    },
+    "Uno.Fonts.Fluent/2.6.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-mV1JWlpU9e6uWf/hamfTv+ysSRlRjjao1WtewGUtFz2/tB83C5h10gZReiWX4ZQXG2P0bgI/yx1ZxPYfiM3Hcg==",
+      "path": "uno.fonts.fluent/2.6.1",
+      "hashPath": "uno.fonts.fluent.2.6.1.nupkg.sha512"
+    },
+    "Uno.Foundation/6.0.465": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-rzOaarM1Cw7uL8AfMmo5QCHVCjTA0nTigZO3tPcWNClmpBmLADTzrJVSFm9x6nT3FlkVj6kP3ObVABpN9Ugpmw==",
+      "path": "uno.foundation/6.0.465",
+      "hashPath": "uno.foundation.6.0.465.nupkg.sha512"
+    },
+    "Uno.Foundation.Logging/6.0.465": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-k73NaJwxgmmMTJiBo+CJO4TbACc66stdXLDd9fIxqRo5qPvGWakWJvDgxftkBf3D/IY61UH7/K3mpJfSSRJmrw==",
+      "path": "uno.foundation.logging/6.0.465",
+      "hashPath": "uno.foundation.logging.6.0.465.nupkg.sha512"
+    },
+    "Uno.WinRT/6.0.465": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-cVYCU2IBXwZEhBkwsZSE1LfGgMzJm2XvrGY9sXMZRLJC7+772g0/fuZPCYpMpBVUKoeeDkUCo1YbDUacxH0TIA==",
+      "path": "uno.winrt/6.0.465",
+      "hashPath": "uno.winrt.6.0.465.nupkg.sha512"
+    },
+    "Uno.WinUI/6.0.465": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WkQhdarcmbCgYvKfSrE+gkBZLFafzYOqr3vrmZTRyPlMsFeVgTdW/L4Ovpq2ErIk0hB7s0keWjbHHda70iBsNw==",
+      "path": "uno.winui/6.0.465",
+      "hashPath": "uno.winui.6.0.465.nupkg.sha512"
+    }
+  }
+}
