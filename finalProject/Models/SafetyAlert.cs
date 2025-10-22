@@ -114,12 +114,13 @@ namespace finalProject.Models
         }
 
         // 위반 감지 시 호출되는 메인 메서드
-        public static async Task ProcessViolation(string workerId, bool missingHelmet, bool missingVest, bool missingGloves)
+        public static async Task ProcessViolation(string workerId, bool missingHelmet, bool missingVest, bool missingGloves, bool missingGoggles)
         {
             var violations = new List<string>();
             if (missingHelmet) violations.Add("안전모");
             if (missingVest) violations.Add("안전 조끼");
             if (missingGloves) violations.Add("안전 장갑");
+            if (missingGoggles) violations.Add("보안경");
 
             if (violations.Count == 0) return;
 

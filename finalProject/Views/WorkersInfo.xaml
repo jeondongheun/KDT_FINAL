@@ -14,7 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="350"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -61,8 +61,8 @@
         </UniformGrid>
 
         <GroupBox Header="  안전 장비 착용 상태  " Grid.Row="1" Grid.ColumnSpan="2" FontSize="20" FontWeight="SemiBold" Margin="15" Foreground="White" BorderBrush="Gray" BorderThickness="1">
-            <UniformGrid Rows="4" Margin="5">
-                <Border x:Name="borderH" Height="70" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+            <UniformGrid Rows="5" Margin="5">
+                <Border x:Name="borderH" Height="60" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <mui:ProgressRing x:Name="progHelmet" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkH" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
@@ -71,7 +71,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border x:Name="borderV" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                <Border x:Name="borderV" Height="60" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <mui:ProgressRing x:Name="progVest" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkV" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
@@ -80,7 +80,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border x:Name="borderG" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                <Border x:Name="borderG" Height="60" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <mui:ProgressRing x:Name="progGloves" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
                         <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
@@ -89,11 +89,20 @@
                     </StackPanel>
                 </Border>
 
+                <Border x:Name="borderGo" Height="60" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <mui:ProgressRing x:Name="progGoggles" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
+                        <fa:ImageAwesome Icon="CheckCircle" x:Name="checkGo" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                        <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnGo" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
+                        <TextBlock x:Name="goggles" Text="보안경" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold" Foreground="Black"/>
+                    </StackPanel>
+                </Border>
+
                 <Border>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock x:Name="sirenF" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                        <TextBlock x:Name="sirenF" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
                         <TextBlock x:Name="txtAlert" TextAlignment="Center" VerticalAlignment="Center" Margin="10"/>
-                        <TextBlock x:Name="sirenB" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
+                        <TextBlock x:Name="sirenB" Text="🚨" Foreground="Tomato" TextAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -101,7 +110,7 @@
 
 
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2">
-            <Border Height="70" Background="#00538F" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+            <Border Height="50" Background="#00538F" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                 <Button x:Name="btnStartWork" Content="작업 시작" Foreground="White" BorderBrush="Transparent" Background="Transparent" VerticalAlignment="Center" FontSize="17" FontWeight="SemiBold" Click="btnStartWork_Click"/>
             </Border>
         </StackPanel>

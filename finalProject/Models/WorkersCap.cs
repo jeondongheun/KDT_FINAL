@@ -120,7 +120,7 @@ namespace finalProject.Models
 
         public static void DrawPPEStatus(Mat frame,
             (int x1, int y1, int x2, int y2, float score) person,
-            bool hasHelmet, bool hasVest, bool hasGloves)
+            bool hasHelmet, bool hasVest, bool hasGloves, bool hasGoggles)
         {
             // 전체 PPE 준수 여부에 따른 색상 결정
             bool allCompliant = hasHelmet && hasVest && hasGloves;
@@ -148,7 +148,8 @@ namespace finalProject.Models
             {
                 $"헬멧: {(hasHelmet ? "✓" : "✗")}",
                 $"조끼: {(hasVest ? "✓" : "✗")}",
-                $"장갑: {(hasGloves ? "✓" : "✗")}"
+                $"장갑: {(hasGloves ? "✓" : "✗")}",
+                $"보안경: {(hasGoggles ? "✓" : "✗")}"
             };
 
             int yOffset = newY + newHeight + 70;

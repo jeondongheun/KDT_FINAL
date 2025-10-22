@@ -104,7 +104,7 @@ namespace finalProject.Models
                 var helmets = new List<(int x1, int y1, int x2, int y2)>();
                 var vests = new List<(int x1, int y1, int x2, int y2)>();
                 var gloves = new List<(int x1, int y1, int x2, int y2)>();
-                var boots = new List<(int x1, int y1, int x2, int y2)>();
+                var goggles = new List<(int x1, int y1, int x2, int y2)>();
 
                 for (int i = 0; i < numBoxes; i++)
                 {
@@ -143,9 +143,9 @@ namespace finalProject.Models
                             vests.Add((x1, y1, x2, y2));
                             break;
                         case 3: // boots
-                            boots.Add((x1, y1, x2, y2));
                             break;
                         case 4: // goggles (필요하면 처리)
+                            goggles.Add((x1, y1, x2, y2));
                             break;
                         case 5: // none - 무시
                             break;
@@ -171,7 +171,7 @@ namespace finalProject.Models
 
                     foreach (var person in persons)
                     {
-                        AnalyzePPEStatus(frame, person, helmets, vests, gloves);
+                        AnalyzePPEStatus(frame, person, helmets, vests, gloves, goggles);
                     }
 
                     if (!string.IsNullOrEmpty(currentWorkerId))
@@ -223,7 +223,8 @@ namespace finalProject.Models
             (int x1, int y1, int x2, int y2, float score) person,
             List<(int x1, int y1, int x2, int y2)> helmets,
             List<(int x1, int y1, int x2, int y2)> vests,
-            List<(int x1, int y1, int x2, int y2)> gloves)
+            List<(int x1, int y1, int x2, int y2)> gloves,
+            List<(int x1, int y1, int x2, int y2)> goggles)
         {
             // PPE 착용 상태 확인
             bool hasHelmet = helmets.Any(h => RectOverlap(person.x1, person.y1, person.x2, person.y2,
@@ -232,12 +233,14 @@ namespace finalProject.Models
                                                       v.x1, v.y1, v.x2, v.y2));
             bool hasGloves = gloves.Any(g => RectOverlap(person.x1, person.y1, person.x2, person.y2,
                                                          g.x1, g.y1, g.x2, g.y2));
+            bool hasGoggles = goggles.Any(g => RectOverlap(person.x1, person.y1, person.x2, person.y2,
+                                                         g.x1, g.y1, g.x2, g.y2));
 
             // 디버깅용 로그
             Debug.WriteLine($"PPE Status - Helmet: {hasHelmet}, Vest: {hasVest}, Gloves: {hasGloves}");
 
             // UI 업데이트
-            SafetyCheckUI.UpdatePPEUI(hasHelmet, hasVest, hasGloves);
+            SafetyCheckUI.UpdatePPEUI(hasHelmet, hasVest, hasGloves, hasGoggles);
 
             // PPE 착용 여부 - 안전모 필착
             bool entryViolation = !hasHelmet;
@@ -306,7 +309,7 @@ namespace finalProject.Models
 
                         // WorkersInfo 출력
                         WorkersWin.Show();
-                        SafetyCheckUI.UpdateWorkersInfo(hasHelmet, hasVest, hasGloves, recognizedWorker);
+                        SafetyCheckUI.UpdateWorkersInfo(hasHelmet, hasVest, hasGloves, hasGoggles, recognizedWorker);
 
                         Debug.WriteLine("안전 장비 착용 확인 - 작업자 정보 확인 요망");
                     }
@@ -372,7 +375,7 @@ namespace finalProject.Models
                         }
 
                         // 통합 알림으로 여섯 시간에 한 번 메일 전송
-                        await SafetyAlert.ProcessViolation(workerId, !hasHelmet, !hasVest, !hasGloves);
+                        await SafetyAlert.ProcessViolation(workerId, !hasHelmet, !hasVest, !hasGloves, !hasGoggles);
                     }
                     catch (Exception ex)
                     {
@@ -382,7 +385,7 @@ namespace finalProject.Models
             }
 
             // 화면에 상태 표시
-            WorkersCap.DrawPPEStatus(frame, person, hasHelmet, hasVest, hasGloves);
+            WorkersCap.DrawPPEStatus(frame, person, hasHelmet, hasVest, hasGloves, hasGoggles);
         }
 
         // 사각형 겹침 여부 판단 (좀 더 관대하게)

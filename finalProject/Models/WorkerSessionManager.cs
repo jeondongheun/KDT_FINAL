@@ -13,7 +13,7 @@ namespace finalProject.Models
     {
         private static Dictionary<string, WorkerSession> activeSessions = new Dictionary<string, WorkerSession>();
         private static HashSet<string> ppeCheckedWorkers = new HashSet<string>();
-        private static HashSet<string> capturedWorkers = new HashSet<string>();
+        private static HashSet<string> capturedWorkers = new HashSet<string>(); // 이미지 캡처된 작업자
         private static readonly TimeSpan SESSION_DURATION = TimeSpan.FromHours(8);
 
         public class WorkerSession
@@ -90,6 +90,7 @@ namespace finalProject.Models
         public static void ResetDailySessions()
         {
             activeSessions.Clear();
+            ppeCheckedWorkers.Clear();
             capturedWorkers.Clear();
             Debug.WriteLine("일일 세션 초기화 완료");
         }
@@ -101,14 +102,29 @@ namespace finalProject.Models
                    .Where(s => s.IsCheckedIn && DateTime.Now - s.CheckInTime < SESSION_DURATION).ToList();
         }
 
-        // 이미지 캡처 여부 확인
+        // 이미지 캡처 여부 확인 (수정됨)
         public static bool WorkersImageCap(string workerId)
         {
-            return capturedWorkers.Contains(workerId);
+            bool isCaptured = capturedWorkers.Contains(workerId);
+            Debug.WriteLine($"{workerId} - 캡처 여부: {isCaptured}");
+            return isCaptured;
         }
 
-        // 캡처 완료
+        // 이미지 캡처 완료 표시 (수정됨 - PPE 검사와 분리)
         public static void MarkAsCaptured(string workerId)
+        {
+            if (string.IsNullOrEmpty(workerId))
+                return;
+
+            if (!capturedWorkers.Contains(workerId))
+            {
+                capturedWorkers.Add(workerId);
+                Debug.WriteLine($"{workerId} - 이미지 캡처 완료 기록");
+            }
+        }
+
+        // PPE 검사 완료 표시 (새로 추가)
+        public static void MarkPPEChecked(string workerId)
         {
             if (string.IsNullOrEmpty(workerId))
                 return;
@@ -125,28 +141,34 @@ namespace finalProject.Models
             }
         }
 
+        // PPE 검사 완료 여부 확인
+        public static bool IsPPEChecked(string workerId)
+        {
+            if (string.IsNullOrEmpty(workerId))
+                return false;
+
+            bool isChecked = ppeCheckedWorkers.Contains(workerId);
+
+            if (isChecked)
+            {
+                Debug.WriteLine($"{workerId} - PPE 검사 이미 완료됨");
+            }
+            else
+            {
+                Debug.WriteLine($"{workerId} - PPE 검사 필요");
+            }
+
+            return isChecked;
+        }
+
         // PPE 검사 필요 여부 확인 (YOLO 모델 실행 여부 결정)
         public static bool NeedsPPECheck(string workerId)
         {
             if (string.IsNullOrEmpty(workerId))
                 return true; // workerId 없으면 일단 검사 (미인식 작업자)
 
-            // 이미 검사했으면 false 반환
-            if (ppeCheckedWorkers.Contains(workerId))
-            {
-                Console.WriteLine($"{workerId} - PPE 검사 이미 완료됨");
-                Debug.WriteLine($"{workerId} - PPE 검사 이미 완료됨");
-                return false;
-            }
-
-            Console.WriteLine($"{workerId} - PPE 검사 필요");
-            Debug.WriteLine($"{workerId} - PPE 검사 필요");
-            return true;
-        }
-
-        public static bool IsPPEChecked(string workerId)
-        {
-            return ppeCheckedWorkers.Contains(workerId);
+            // IsPPEChecked의 반대값 반환
+            return !IsPPEChecked(workerId);
         }
     }
 }

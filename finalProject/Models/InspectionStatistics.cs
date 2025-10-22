@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 
 namespace finalProject.Models
@@ -14,6 +15,15 @@ namespace finalProject.Models
         public string Type { get; set; }
         public string Result { get; set; }
         public int DefectCount { get; set; }
+    }
+
+    /// <summary>
+    /// 시간대별 불량률 데이터
+    /// </summary>
+    public class DefectRatePoint
+    {
+        public DateTime Time { get; set; }
+        public double Rate { get; set; }
     }
 
     /// <summary>
@@ -33,8 +43,19 @@ namespace finalProject.Models
         // 불량 유형별 카운트
         public Dictionary<string, int> DefectTypeCount { get; set; }
 
+        // 불량 개수 범위별 카운트 추가
+        public Dictionary<string, int> DefectCountRange { get; set; }
+
         // 최근 검사 결과 리스트
         public ObservableCollection<InspectionResult> RecentResults { get; set; }
+
+        // ⭐ 시간대별 불량률 기록 추가 ⭐
+        public ObservableCollection<DefectRatePoint> DefectRateHistory { get; set; }
+
+        // 마지막 기록 시간 (예: 1분마다 기록)
+        private DateTime lastRecordTime;
+        private int inspectionsInCurrentPeriod;
+        private int defectsInCurrentPeriod;
 
         // 정상률 (%)
         public double NormalRate => TotalInspected > 0
@@ -62,7 +83,21 @@ namespace finalProject.Models
                 { "copper", 0 }
             };
 
+            DefectCountRange = new Dictionary<string, int>
+            {
+                { "1-2", 0 },
+                { "3-4", 0 },
+                { "5-6", 0 },
+                { "7+", 0 }
+            };
+
             RecentResults = new ObservableCollection<InspectionResult>();
+
+            // ⭐ 시간대별 불량률 초기화 ⭐
+            DefectRateHistory = new ObservableCollection<DefectRatePoint>();
+            lastRecordTime = DateTime.Now;
+            inspectionsInCurrentPeriod = 0;
+            defectsInCurrentPeriod = 0;
         }
 
         /// <summary>
@@ -71,21 +106,25 @@ namespace finalProject.Models
         public void RecordInspection(bool isNormal, List<string> detectedDefects = null)
         {
             TotalInspected++;
+            inspectionsInCurrentPeriod++;
 
             if (isNormal)
             {
                 NormalCount++;
-
-                // 최근 결과에 추가
                 AddRecentResult("Normal", "OK", 0);
             }
             else
             {
                 DefectCount++;
+                defectsInCurrentPeriod++;
+
+                int defectCount = 0;
 
                 // 불량 유형별 카운트 증가
                 if (detectedDefects != null && detectedDefects.Count > 0)
                 {
+                    defectCount = detectedDefects.Count;
+
                     foreach (var defect in detectedDefects)
                     {
                         if (DefectTypeCount.ContainsKey(defect))
@@ -99,7 +138,95 @@ namespace finalProject.Models
                 }
                 else
                 {
+                    defectCount = 1;
                     AddRecentResult("Unknown", "NG", 1);
+                }
+
+                // ⭐⭐ 불량 개수 범위별 카운트 증가 ⭐⭐
+                if (defectCount >= 1 && defectCount <= 2)
+                {
+                    DefectCountRange["1-2"]++;
+                }
+                else if (defectCount >= 3 && defectCount <= 4)
+                {
+                    DefectCountRange["3-4"]++;
+                }
+                else if (defectCount >= 5 && defectCount <= 6)
+                {
+                    DefectCountRange["5-6"]++;
+                }
+                else if (defectCount >= 7)
+                {
+                    DefectCountRange["7+"]++;
+                }
+            }
+
+            // ⭐ 일정 시간마다 불량률 기록 (1분마다 또는 10회 검사마다) ⭐
+            UpdateDefectRateHistory();
+        }
+
+        /*
+        /// <summary>
+        /// 시간대별 불량률 업데이트 (1분마다 또는 10회 검사마다)
+        /// </summary>
+        private void UpdateDefectRateHistory()
+        {
+            var now = DateTime.Now;
+
+            // 1분이 지났거나 10회 이상 검사했을 때 기록
+            if ((now - lastRecordTime).TotalSeconds >= 60 || inspectionsInCurrentPeriod >= 10)
+            {
+                if (inspectionsInCurrentPeriod > 0)
+                {
+                    double periodRate = Math.Round(
+                        (double)defectsInCurrentPeriod / inspectionsInCurrentPeriod * 100, 2);
+
+                    DefectRateHistory.Add(new DefectRatePoint
+                    {
+                        Time = now,
+                        Rate = periodRate
+                    });
+
+                    // 최대 20개 포인트만 유지 (화면에 표시할 개수)
+                    while (DefectRateHistory.Count > 20)
+                    {
+                        DefectRateHistory.RemoveAt(0);
+                    }
+                }
+
+                // 카운터 초기화
+                lastRecordTime = now;
+                inspectionsInCurrentPeriod = 0;
+                defectsInCurrentPeriod = 0;
+            }
+        }
+        */
+
+        /// <summary>
+        /// 시간대별 불량률 업데이트 (테스트용 - 매 검사마다 기록)
+        /// </summary>
+        private void UpdateDefectRateHistory()
+        {
+            var now = DateTime.Now;
+
+            // ⭐ 테스트용: 매 검사마다 누적 불량률 기록 ⭐
+            if (TotalInspected > 0)
+            {
+                double currentRate = Math.Round(
+                    (double)DefectCount / TotalInspected * 100, 2);
+
+                DefectRateHistory.Add(new DefectRatePoint
+                {
+                    Time = now,
+                    Rate = currentRate
+                });
+
+                Debug.WriteLine($"📈 불량률 기록: {TotalInspected}회 검사, 불량률 {currentRate}%");
+
+                // 최대 20개 포인트만 유지
+                while (DefectRateHistory.Count > 20)
+                {
+                    DefectRateHistory.RemoveAt(0);
                 }
             }
         }
@@ -141,7 +268,19 @@ namespace finalProject.Models
                 DefectTypeCount[key] = 0;
             }
 
+            // ⭐⭐ 불량 개수 범위도 초기화 ⭐⭐
+            foreach (var key in DefectCountRange.Keys.ToList())
+            {
+                DefectCountRange[key] = 0;
+            }
+
             RecentResults.Clear();
+
+            // ⭐ 시간대별 불량률 기록 초기화 ⭐
+            DefectRateHistory.Clear();
+            lastRecordTime = DateTime.Now;
+            inspectionsInCurrentPeriod = 0;
+            defectsInCurrentPeriod = 0;
         }
 
         /// <summary>

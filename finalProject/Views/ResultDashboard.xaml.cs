@@ -59,13 +59,13 @@ namespace finalProject.Views
         private void LoadInitialData()
         {
             // DataGrid 열 너비 설정
-    ConfigureDataGridColumns();
+            ConfigureDataGridColumns();
     
-    if (factoryControl != null)
-    {
-        var stats = factoryControl.GetCurrentStatistics();
-        UpdateStatisticsUI(stats);
-    }
+            if (factoryControl != null)
+            {
+                var stats = factoryControl.GetCurrentStatistics();
+                UpdateStatisticsUI(stats);
+            }
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e)
@@ -92,7 +92,11 @@ namespace finalProject.Views
             TxtRate.Text = $"{stats.DefectRate}%";
 
             // Pie Chart 데이터 업데이트
-            UpdatePieChart(stats);
+            UpdatePieChart(stats, PieCanvas);
+            UpdateDefectCountChart(stats, PieCanvas2);
+
+            // Line Chart 데이터 업데이트
+            DrawDefectRateChart();
 
             // 최근 결과 테이블 업데이트
             UpdateRecentResults(stats);
@@ -127,13 +131,13 @@ namespace finalProject.Views
             {
                 if (GridRecent.Columns.Count > 0)
                 {
-                    // 모든 열을 균등하게 분배
+                              // 모든 열을 균등하게 분배
                     //foreach (var column in GridRecent.Columns)
                     //{
                     //    column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
                     //}
 
-                    // 또는 특정 비율로 설정
+                              // 또는 특정 비율로 설정
                     GridRecent.Columns[0].Width = new DataGridLength(2, DataGridLengthUnitType.Star); // Time 열을 2배
                     GridRecent.Columns[1].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
                     GridRecent.Columns[2].Width = new DataGridLength(1, DataGridLengthUnitType.Star);
@@ -145,18 +149,21 @@ namespace finalProject.Views
         /// <summary>
         /// 불량 유형별 파이 차트 업데이트
         /// </summary>
-        private void UpdatePieChart(InspectionStatistics stats)
+        private void UpdatePieChart(InspectionStatistics stats, Canvas targetCanvas)
         {
-            // PieCanvas를 클리어
-            PieCanvas.Children.Clear();
+            // targetCanvas를 클리어
+            targetCanvas.Children.Clear();
 
             if (stats.TotalInspected == 0) return;
 
-            double centerX = 100; // Canvas Width = 200
-            double centerY = 100; // Canvas Height = 200
-            double radius = 80;
+            double canvasWidth = 250;
+            double canvasHeight = 250;
+            double centerX = canvasWidth / 2;
+            double centerY = canvasHeight / 2;
+            double outerRadius = Math.Min(canvasWidth, canvasHeight) / 2 - 20;
+            double innerRadius = outerRadius * 0.70;
 
-            // 불량 유형별 데이터
+            // 불량이 있는 유형만 필터링
             var defectTypes = new[]
             {
                 new { Name = "short", Count = stats.DefectTypeCount["short"], Color = "#3DA5FF" },
@@ -165,69 +172,136 @@ namespace finalProject.Views
                 new { Name = "spur", Count = stats.DefectTypeCount["spur"], Color = "#F0E06E" },
                 new { Name = "open", Count = stats.DefectTypeCount["open"], Color = "#D498AD" },
                 new { Name = "copper", Count = stats.DefectTypeCount["copper"], Color = "#A6A0D8" }
-            };
+            }.Where(d => d.Count > 0).ToArray(); // ⭐ 카운트가 0보다 큰 것만
 
-            int totalDefects = stats.DefectCount;
-            if (totalDefects == 0) return;
+            // 실제 불량 개수의 합계로 계산
+            int totalDefects = defectTypes.Sum(d => d.Count);
 
-            double startAngle = 0;
+            if (totalDefects == 0)
+            {
+                // 불량이 없으면 빈 원 표시
+                return;
+            }
+
+            double startAngle = -90; // 12시 방향부터 시작
 
             foreach (var defect in defectTypes)
             {
-                if (defect.Count == 0) continue;
-
                 double sweepAngle = (double)defect.Count / totalDefects * 360;
 
-                // PathGeometry를 사용해 파이 조각 그리기
-                var pie = CreatePieSlice(centerX, centerY, radius, startAngle, sweepAngle, defect.Color);
-                PieCanvas.Children.Add(pie);
+                // 도넛 조각 그리기
+                var donut = CreateDonutSlice(centerX, centerY, outerRadius, innerRadius, startAngle, sweepAngle, defect.Color);
+                targetCanvas.Children.Add(donut);
 
                 startAngle += sweepAngle;
             }
-
-            // 중앙 원 (도넛 차트 스타일)
-            var centerCircle = new System.Windows.Shapes.Ellipse
-            {
-                Width = radius * 0.6,
-                Height = radius * 0.6,
-                Fill = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#181B22"))
-            };
-
-            System.Windows.Controls.Canvas.SetLeft(centerCircle, centerX - radius * 0.3);
-            System.Windows.Controls.Canvas.SetTop(centerCircle, centerY - radius * 0.3);
-            PieCanvas.Children.Add(centerCircle);
         }
 
         /// <summary>
-        /// 파이 차트 조각 생성
+        /// 불량 개수별 파이 차트 업데이트
         /// </summary>
-        private System.Windows.Shapes.Path CreatePieSlice(double centerX, double centerY,
-            double radius, double startAngle, double sweepAngle, string colorHex)
+        private void UpdateDefectCountChart(InspectionStatistics stats, Canvas targetCanvas)
+        {
+            targetCanvas.Children.Clear();
+
+                  // ⭐⭐ 조건 수정: DefectCount == 0 체크 제거 ⭐⭐
+            if (stats == null || stats.DefectCountRange == null)
+            {
+                Debug.WriteLine("⚠ UpdateDefectCountChart: stats 또는 DefectCountRange가 null");
+                return;
+            }
+
+            double canvasWidth = 250;
+            double canvasHeight = 250;
+            double centerX = canvasWidth / 2;
+            double centerY = canvasHeight / 2;
+            double outerRadius = Math.Min(canvasWidth, canvasHeight) / 2 - 20;
+            double innerRadius = outerRadius * 0.70;
+
+            // 불량 개수 범위별 데이터 - 안전한 접근
+            var defectRanges = new[]
+            {
+                new { Name = "1-2", Count = stats.DefectCountRange.ContainsKey("1-2") ? stats.DefectCountRange["1-2"] : 0, Color = "#789DBC" },
+                new { Name = "3-4", Count = stats.DefectCountRange.ContainsKey("3-4") ? stats.DefectCountRange["3-4"] : 0, Color = "#FFE3E3" },
+                new { Name = "5-6", Count = stats.DefectCountRange.ContainsKey("5-6") ? stats.DefectCountRange["5-6"] : 0, Color = "#FEF9F2" },
+                new { Name = "7+", Count = stats.DefectCountRange.ContainsKey("7+") ? stats.DefectCountRange["7+"] : 0, Color = "#C9E9D2" }
+            }.Where(d => d.Count > 0).ToArray();
+
+            int totalDefectProducts = defectRanges.Sum(d => d.Count);
+
+            Debug.WriteLine($"📊 UpdateDefectCountChart: 1-2={stats.DefectCountRange.GetValueOrDefault("1-2", 0)}, " +
+                           $"3-4={stats.DefectCountRange.GetValueOrDefault("3-4", 0)}, " +
+                           $"5-6={stats.DefectCountRange.GetValueOrDefault("5-6", 0)}, " +
+                           $"7+={stats.DefectCountRange.GetValueOrDefault("7+", 0)}, " +
+                           $"Total={totalDefectProducts}");
+
+            //if (totalDefectProducts == 0)
+            //{
+                  //       Debug.WriteLine("⚠ UpdateDefectCountChart: totalDefectProducts = 0");
+            //    return;
+            //}
+
+            double startAngle = -90;
+
+            foreach (var range in defectRanges)
+            {
+                double sweepAngle = (double)range.Count / totalDefectProducts * 360;
+                Debug.WriteLine($"🎨 차트: {range.Name} = {range.Count}개 ({sweepAngle:F1}도)");
+
+                var donut = CreateDonutSlice(centerX, centerY, outerRadius, innerRadius, startAngle, sweepAngle, range.Color);
+                targetCanvas.Children.Add(donut);
+                startAngle += sweepAngle;
+            }
+        }
+
+        /// <summary>
+        /// 도넛 차트 조각 생성 (얇은 링 형태)
+        /// </summary>
+        private System.Windows.Shapes.Path CreateDonutSlice(double centerX, double centerY,
+            double outerRadius, double innerRadius, double startAngle, double sweepAngle, string colorHex)
         {
             double startRad = startAngle * Math.PI / 180;
             double endRad = (startAngle + sweepAngle) * Math.PI / 180;
 
-            double x1 = centerX + radius * Math.Cos(startRad);
-            double y1 = centerY + radius * Math.Sin(startRad);
-            double x2 = centerX + radius * Math.Cos(endRad);
-            double y2 = centerY + radius * Math.Sin(endRad);
+            // 외부 원호의 시작/끝점
+            double outerX1 = centerX + outerRadius * Math.Cos(startRad);
+            double outerY1 = centerY + outerRadius * Math.Sin(startRad);
+            double outerX2 = centerX + outerRadius * Math.Cos(endRad);
+            double outerY2 = centerY + outerRadius * Math.Sin(endRad);
+
+            // 내부 원호의 시작/끝점
+            double innerX1 = centerX + innerRadius * Math.Cos(startRad);
+            double innerY1 = centerY + innerRadius * Math.Sin(startRad);
+            double innerX2 = centerX + innerRadius * Math.Cos(endRad);
+            double innerY2 = centerY + innerRadius * Math.Sin(endRad);
 
             bool largeArc = sweepAngle > 180;
 
             var pathFigure = new System.Windows.Media.PathFigure
             {
-                StartPoint = new Point(centerX, centerY),
+                StartPoint = new Point(outerX1, outerY1),
                 IsClosed = true
             };
 
-            pathFigure.Segments.Add(new System.Windows.Media.LineSegment(new Point(x1, y1), true));
+            // 외부 원호
             pathFigure.Segments.Add(new System.Windows.Media.ArcSegment(
-                new Point(x2, y2),
-                new Size(radius, radius),
+                new Point(outerX2, outerY2),
+                new Size(outerRadius, outerRadius),
                 0,
                 largeArc,
                 System.Windows.Media.SweepDirection.Clockwise,
+                true));
+
+            // 끝점에서 내부로 연결
+            pathFigure.Segments.Add(new System.Windows.Media.LineSegment(new Point(innerX2, innerY2), true));
+
+            // 내부 원호 (반대 방향)
+            pathFigure.Segments.Add(new System.Windows.Media.ArcSegment(
+                new Point(innerX1, innerY1),
+                new Size(innerRadius, innerRadius),
+                0,
+                largeArc,
+                System.Windows.Media.SweepDirection.Counterclockwise,
                 true));
 
             var pathGeometry = new System.Windows.Media.PathGeometry();
@@ -241,6 +315,148 @@ namespace finalProject.Views
             };
 
             return path;
+        }
+
+        /// <summary>
+        /// ⭐ 시간대별 불량률 라인 차트 그리기 (테스트용) ⭐
+        /// </summary>
+        private void DrawDefectRateChart()
+        {
+            if (factoryControl == null) return;
+
+            var stats = factoryControl.GetCurrentStatistics();
+            if (stats?.DefectRateHistory == null) return;
+
+            LineChart.Children.Clear();
+
+            // 축 그리기
+            Line yAxis = new Line
+            {
+                X1 = 40,
+                Y1 = 10,
+                X2 = 40,
+                Y2 = 230,
+                Stroke = new SolidColorBrush(Color.FromRgb(35, 42, 54)),
+                StrokeThickness = 2
+            };
+            Line xAxis = new Line
+            {
+                X1 = 40,
+                Y1 = 230,
+                X2 = 760,
+                Y2 = 230,
+                Stroke = new SolidColorBrush(Color.FromRgb(35, 42, 54)),
+                StrokeThickness = 2
+            };
+            LineChart.Children.Add(yAxis);
+            LineChart.Children.Add(xAxis);
+
+            var data = stats.DefectRateHistory;
+
+            // ⭐ 테스트용: 데이터가 1개만 있어도 표시 ⭐
+            if (data.Count < 1) return; // 데이터가 하나도 없으면 return
+
+            // Y축 눈금선과 레이블 먼저 그리기
+            double chartHeight = 220.0;
+            double maxRate = data.Count > 0 ? Math.Max(data.Max(d => d.Rate), 10) : 10;
+
+            for (int i = 0; i <= 5; i++)
+            {
+                double y = 230 - (i * chartHeight / 5);
+                double rateValue = (i * maxRate / 5);
+
+                // 눈금선
+                Line gridLine = new Line
+                {
+                    X1 = 40,
+                    Y1 = y,
+                    X2 = 760,
+                    Y2 = y,
+                    Stroke = new SolidColorBrush(Color.FromRgb(35, 42, 54)),
+                    StrokeThickness = 0.5,
+                    StrokeDashArray = new DoubleCollection { 2, 2 }
+                };
+                LineChart.Children.Add(gridLine);
+
+                // Y축 레이블
+                TextBlock label = new TextBlock
+                {
+                    Text = $"{rateValue:F0}%",
+                    Foreground = new SolidColorBrush(Color.FromRgb(152, 162, 179)),
+                    FontSize = 10
+                };
+                Canvas.SetLeft(label, 5);
+                Canvas.SetTop(label, y - 8);
+                LineChart.Children.Add(label);
+            }
+
+            // 데이터가 1개만 있으면 포인트만 표시
+            if (data.Count == 1)
+            {
+                double yScale = chartHeight / maxRate;
+                double x = 40;
+                double y = 230 - (data[0].Rate * yScale);
+
+                Ellipse point = new Ellipse
+                {
+                    Width = 8,
+                    Height = 8,
+                    Fill = new SolidColorBrush(Color.FromRgb(255, 107, 107))
+                };
+                Canvas.SetLeft(point, x - 4);
+                Canvas.SetTop(point, y - 4);
+                LineChart.Children.Add(point);
+
+                // 디버그 출력
+                Debug.WriteLine($"📊 라인차트: 데이터 1개 - Rate={data[0].Rate}%");
+                return;
+            }
+
+            // 그래프 영역 설정
+            double chartWidth = 720.0;
+            double xStep = chartWidth / Math.Max(data.Count - 1, 1);
+            double yScale2 = chartHeight / maxRate;
+
+            // 선 그리기
+            for (int i = 0; i < data.Count - 1; i++)
+            {
+                double x1 = 40 + (i * xStep);
+                double y1 = 230 - (data[i].Rate * yScale2);
+                double x2 = 40 + ((i + 1) * xStep);
+                double y2 = 230 - (data[i + 1].Rate * yScale2);
+
+                Line line = new Line
+                {
+                    X1 = x1,
+                    Y1 = y1,
+                    X2 = x2,
+                    Y2 = y2,
+                    Stroke = new SolidColorBrush(Color.FromRgb(255, 107, 107)),
+                    StrokeThickness = 2
+                };
+                LineChart.Children.Add(line);
+            }
+
+            // 포인트 표시
+            for (int i = 0; i < data.Count; i++)
+            {
+                double x = 40 + (i * xStep);
+                double y = 230 - (data[i].Rate * yScale2);
+
+                Ellipse point = new Ellipse
+                {
+                    Width = 6,
+                    Height = 6,
+                    Fill = new SolidColorBrush(Color.FromRgb(255, 107, 107))
+                };
+
+                Canvas.SetLeft(point, x - 3);
+                Canvas.SetTop(point, y - 3);
+                LineChart.Children.Add(point);
+            }
+
+            // 디버그 출력
+            Debug.WriteLine($"📊 라인차트: {data.Count}개 데이터 표시됨");
         }
 
         /// <summary>

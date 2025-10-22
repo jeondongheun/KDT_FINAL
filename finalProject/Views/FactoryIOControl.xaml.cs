@@ -657,6 +657,12 @@ namespace finalProject.Views
                 convWithSensorStop = true;
                 isInspecting = true;
 
+
+                if (!prodsRollerActive)
+                {
+                    prodsBoxNeeded = true;
+                }
+
                 // ⭐⭐ PLC 컨베이어 정지 신호 추가 ⭐⭐
                 if (plcManager?.IsConnected == true)
                 {
@@ -695,16 +701,8 @@ namespace finalProject.Views
                             }
                             else
                             {
-                                string defectTypes = detectedDefects.Count > 0
-                                    ? string.Join(", ", detectedDefects)
-                                    : "분류 안됨";
-                                LogMessage($"❌ 불량 제품 [{inspectionStats.TotalInspected}번째 검사] - 유형: {defectTypes}");
+                                string defectTypes = detectedDefects.Count > 0 ? string.Join(", ", detectedDefects) : "분류 안됨";
                             }
-
-                            LogMessage($"📊 현재 통계 - 총: {inspectionStats.TotalInspected}, " +
-                                      $"정상: {inspectionStats.NormalCount}, " +
-                                      $"불량: {inspectionStats.DefectCount}, " +
-                                      $"정상률: {inspectionStats.NormalRate}%");
                         });
 
                         // PLC로 검사 결과 전송
@@ -885,7 +883,7 @@ namespace finalProject.Views
                     ? string.Join(", ", detectedDefects)
                     : "분류 안됨";
 
-                LogMessage($"🔍 불량 분류 - 유형: {defectInfo}");
+                LogMessage($"🔍 불량 분류 - 유형: {defectInfo}, 개수: {detectedDefects.Count}");
 
                 // PLC로 결과 전송 (선택사항)
                 if (plcManager?.IsConnected == true)
@@ -904,8 +902,18 @@ namespace finalProject.Views
                     }
                 }
 
-                // pin-hole이 아니면 pusher로 밀어냄
-                shouldPushError = !detectedDefects.Contains("pin-hole");
+                // pin-hole 유무에 따른 재가공 / 폐기 결정
+                bool hasPinHole = detectedDefects.Contains("pin-hole");
+                shouldPushError = !hasPinHole;  // pin-hole 없으면 폐기 (pusher 작동)
+
+                if (hasPinHole)
+                {
+                    LogMessage("🔴 pin-hole 포함 → 재가공 불가 (빨간불)");
+                }
+                else
+                {
+                    LogMessage("🟡 pin-hole 없음 → 재가공 가능 (노란불)");
+                }
             }
 
             // ⭐⭐ 컨베이어 정지 타이머 (2초 = 50ms * 40 = 2000ms) ⭐⭐
@@ -920,12 +928,12 @@ namespace finalProject.Views
                 }
             }
 
-            // 조명 제어
+            // ⭐⭐ 조명 제어 수정 ⭐⭐
             if (factoryInputs[FactoryAddresses.INPUT_ERROR_SORT_SENSOR])
             {
                 // 센서에 제품이 있을 때만 조명 제어
-                bool yellowLight = shouldPushError;
-                bool redLight = !shouldPushError;
+                bool yellowLight = shouldPushError;      // 재가공 가능 (pin-hole 없음)
+                bool redLight = !shouldPushError;        // 재가공 불가 (pin-hole 있음)
 
                 factoryCoils[FactoryAddresses.COIL_REPROCESSING] = yellowLight;
                 factoryCoils[FactoryAddresses.COIL_DISPOSED_LIGTH] = redLight;
@@ -947,6 +955,7 @@ namespace finalProject.Views
                 errorPusher = true;
                 errorPusherTimer = 0;
                 shouldPushError = false;
+                LogMessage("⚡ 폐기 Pusher 작동");
             }
             errorCateSensorPrev = errorCateSensor;
 

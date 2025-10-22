@@ -46,7 +46,7 @@
 
 
         <!-- 안전 장비 착용 여부 판별 -->
-        <UniformGrid Grid.Row="1" Columns="3">
+        <UniformGrid Grid.Row="1" Columns="4">
             <Border x:Name="borderH" Height="70" Background="#F0F5FF" Margin="10 3 3 3" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <mui:ProgressRing x:Name="progHelmet" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
@@ -71,6 +71,15 @@
                     <fa:ImageAwesome Icon="CheckCircle" x:Name="checkG" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
                     <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnG" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
                     <TextBlock x:Name="gloves" Text="안전 장갑" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="borderGo" Height="70" Background="#F0F5FF" Margin="7" CornerRadius="5" BorderThickness="1" BorderBrush="#E5E7EB">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <mui:ProgressRing x:Name="progGoggles" IsActive="True" Width="25" Height="25" Foreground="SteelBlue" Margin="13"/>
+                    <fa:ImageAwesome Icon="CheckCircle" x:Name="checkGo" Margin="13" Width="20" Height="20" Foreground="#10B981" Visibility="Collapsed"/>
+                    <fa:ImageAwesome Icon="ExclamationTriangle" x:Name="warnGo" Margin="13" Width="20" Height="20" Foreground="#F59E0B" Visibility="Collapsed"/>
+                    <TextBlock x:Name="goggles" Text="보안경" VerticalAlignment="Center" TextAlignment="Center" FontSize="17" FontWeight="SemiBold"/>
                 </StackPanel>
             </Border>
         </UniformGrid>
